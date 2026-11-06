@@ -263,6 +263,29 @@ body.focus #focusExit{display:grid}
   #trayToggle{display:grid}
   body.notray #tray{display:none}
 }
+
+/* ===== layout v1.2: one straight tool line, minimisable panels, slimmer bars ===== */
+#trayHead,#trayStrip{display:none}
+@media (min-width:900px){
+  #titlebar{min-height:40px;padding-block:0}
+  #titlebar .ibtn{width:38px;height:38px}
+  #toolbar{padding-block:1px}
+  #toolbar .tb{width:34px;height:34px}
+  #toolbar svg.ci{width:22px;height:22px}
+  #main>#toolset{grid-template-columns:32px;grid-auto-rows:32px;gap:1px;padding:3px 3px;align-content:start}
+  #main>#toolset .tb{width:32px;height:32px;border-radius:7px}
+  #main>#toolset svg.ci{width:21px;height:21px}
+  #main>#toolset .tbsep{margin:1px 3px;height:1px}
+  #main>#toolset{grid-auto-rows:auto} #main>#toolset .tb{height:32px} #main>#toolset .tbsep{height:1px}
+  #statusbar{padding-top:2px;padding-bottom:2px}
+  #vcbIn{height:30px}
+  #trayHead{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 2px 14px;border-bottom:1px solid var(--line);font:600 12px var(--ui);color:var(--muted);position:sticky;top:0;background:var(--surface);z-index:2}
+  #trayHead .ibtn{width:34px;height:34px}
+  body.traymin #tray{display:none}
+  body.traymin #trayStrip{display:flex;flex-direction:column;align-items:center;gap:2px;width:42px;flex:none;padding:4px 0;border-left:1px solid var(--line);background:var(--tool)}
+  #trayStrip .tb{width:34px;height:34px} #trayStrip svg.ci{width:22px;height:22px}
+  #trayToggle{display:grid}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -370,6 +393,8 @@ body.focus #focusExit{display:grid}
   <symbol id="c-quote" viewBox="0 0 24 24"><rect x="4" y="2.5" width="15" height="19" rx="2" fill="#fff6d8" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 7.5h8M7.5 11h8M7.5 14.5h5" stroke="#8a838f" stroke-width="1.3" stroke-linecap="round"/><circle cx="17.5" cy="17.5" r="5" fill="#2e8b57"/><path d="M15.6 15.4h4M15.6 17h4M16.4 15.4c2.4 0 2.4 3.2 0 3.2l2.6 2.4" fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="c-seat" viewBox="0 0 24 24"><rect x="2" y="17.5" width="20" height="2" rx="1" fill="#d5c4b8"/><g fill="#d4a64a" stroke="currentColor" stroke-width=".9"><rect x="3" y="7" width="4.4" height="6" rx="1"/><rect x="9.8" y="7" width="4.4" height="6" rx="1"/><rect x="16.6" y="7" width="4.4" height="6" rx="1"/></g><g fill="#c2185b"><rect x="2.6" y="12.2" width="5.2" height="2" rx=".8"/><rect x="9.4" y="12.2" width="5.2" height="2" rx=".8"/><rect x="16.2" y="12.2" width="5.2" height="2" rx=".8"/></g><path d="M3.6 14.2v3.3M7 14.2v3.3M10.4 14.2v3.3M13.8 14.2v3.3M17.2 14.2v3.3M20.6 14.2v3.3" stroke="currentColor" stroke-width="1"/></symbol>
   <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m6 6 6 6-6 6M12 6l6 6-6 6"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="m18 6-6 6 6 6M12 6l-6 6 6 6"/></symbol>
   <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
   <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></symbol>
 </svg>
@@ -377,7 +402,7 @@ body.focus #focusExit{display:grid}
 <div id="app">
   <div id="titlebar">
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
-    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.1</span><span id="status">Opening…</span></div>
+    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.2</span><span id="status">Opening…</span></div>
     <button class="ibtn" id="designsBtn" aria-label="My designs" title="My designs"><svg class="i"><use href="#i-folder"/></svg></button>
     <button class="ibtn" id="searchBtn" aria-label="Search tools" title="Search tools (Shift+S)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="ibtn" id="undo" aria-label="Undo" title="Undo (Cmd+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
@@ -1639,6 +1664,7 @@ function goView(v){
 
 /* ===== sheets & toast ===== */
 function openSheet(id){ const el=$('#'+id); closeMenus();
+  if(isWide()&&el.closest('#tray')&&document.body.classList.contains('traymin')) setTrayOpen(true);
   if(isWide()&&el.closest('#tray')){ el.classList.remove('collapsed'); const tr=$('#tray'); const top=el.offsetTop-tr.offsetTop; if(top<tr.scrollTop||top>tr.scrollTop+tr.clientHeight-80) tr.scrollTop=Math.max(0,top-8); $('#main').scrollTop=0; $('#main').scrollLeft=0; return; }
   $('#scrim').classList.add('on'); el.classList.add('on'); buzz(6);}
 function closeSheets(){ try{ if(pEdit) commitParams(); }catch(e){}$('#scrim').classList.remove('on'); $$('.sheet').forEach(s=>s.classList.remove('on')); document.activeElement&&document.activeElement.blur&&document.activeElement.blur();}
@@ -3329,7 +3355,7 @@ function openSkpHelp(){ toast('A .skp file can only be opened by SketchUp. In Sk
 
 $('#daeFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importSketchUp(f).catch(err=>bad('Could not open that file: '+err.message)); e.target.value=''; });
 /* ===================== Round 4: settings, quotation, stock, PDF, favourites ===================== */
-const APP_VER='v1.1';
+const APP_VER='v1.2';
 const SET={rates:{},stock:{},favs:[],recent:[],lib:null,_u:0};
 async function settingsLoad(){
   let v=await idbReq('readonly',st=>st.get('settings'));
@@ -3759,12 +3785,21 @@ function bindTips(root){ $$('[data-tip]',root).forEach(el=>{ if(el._tip) return;
 /* ---- bigger canvas: floating tool options, focus mode, hide side panels ---- */
 (function(){ const to=$('#toolopts'); $('#stage').appendChild(to); })();
 function setFocusMode(on){ document.body.classList.toggle('focus',on); $('#focusBtn').setAttribute('aria-pressed',on); $('#focusBtn').dataset.tip=on?'Show tools again':'Full-screen view'; try{ localStorage.setItem('decor3d.focus',on?'1':'0'); }catch(e){} setTimeout(resize,30); if(on) toast('Full-screen view. Tap the corner button to bring the tools back.'); }
-function setTrayOpen(on){ document.body.classList.toggle('notray',!on); $('#trayToggle').setAttribute('aria-pressed',on); try{ localStorage.setItem('decor3d.tray',on?'1':'0'); }catch(e){} setTimeout(resize,30); }
+function setTrayOpen(on){ document.body.classList.toggle('traymin',!on); $('#trayToggle').setAttribute('aria-pressed',on); try{ localStorage.setItem('decor3d.tray',on?'1':'0'); }catch(e){} setTimeout(resize,30); }
 $('#focusBtn').onclick=()=>{ setFocusMode(!document.body.classList.contains('focus')); buzz(6); };
 $('#trayToggle').onclick=()=>{ setTrayOpen(document.body.classList.contains('notray')); buzz(6); };
 { const fx=document.createElement('button'); fx.id='focusExit'; fx.className='ibtn'; fx.setAttribute('aria-label','Show tools again'); fx.innerHTML='<svg class="i"><use href="#i-expand"/></svg>'; fx.onclick=()=>setFocusMode(false); $('#stage').appendChild(fx); }
 try{ if(localStorage.getItem('decor3d.tray')==='0') setTrayOpen(false); }catch(e){}
 [['#focusBtn','Full-screen view',''],['#trayToggle','Show / hide side panels','']].forEach(([sel,n])=>{ const b=$(sel); b.dataset.tip=n; }); bindTips($('#titlebar'));
+
+/* ---- side panels: minimise to a slim strip on the right ---- */
+{ const head=document.createElement('div'); head.id='trayHead'; head.innerHTML=`<span>Panels</span><button class="ibtn" id="trayMin" aria-label="Minimise panels to the side" data-tip="Minimise panels"><svg class="i"><use href="#i-chev-r"/></svg></button>`; $('#tray').prepend(head);
+  const strip=document.createElement('div'); strip.id='trayStrip'; const P=[['card','c-select','Entity Info'],['sheetMat','c-materials','Materials'],['sheetAdd','c-add','Components'],['sheetLayers','c-layers','Layers'],['sheetScenes','c-scenes','Scenes'],['sheetStyles','c-styles','Styles and light']];
+  strip.innerHTML=`<button class="tb" id="trayMax" aria-label="Show panels" data-tip="Show panels"><svg class="i"><use href="#i-chev-l"/></svg></button>`+P.map(([id,ic,n])=>`<button class="tb" data-strip="${id}" aria-label="${n}" data-tip="${n}"><svg class="ci"><use href="#${ic}"/></svg></button>`).join('');
+  $('#tray').after(strip);
+  $('#trayMin').onclick=()=>{ setTrayOpen(false); buzz(6); }; $('#trayMax').onclick=()=>{ setTrayOpen(true); buzz(6); };
+  $$('[data-strip]').forEach(b=>b.onclick=()=>{ const id=b.dataset.strip; setTrayOpen(true); if(id==='card'){ $('#tray').scrollTop=0; } else { if(id==='sheetAdd'){ renderLib(); renderCatalog(); } else if(id==='sheetLayers') openLayers(); else if(id==='sheetScenes') openScenes(); else if(id==='sheetStyles') openStyles(); else if(id==='sheetMat'&&!$('#matGrid').children.length) renderMatSheet(); openSheet(id); } buzz(6); });
+  bindTips(strip); bindTips(head); }
 /* ===== loop ===== */
 function resize(){const r=$('#stage').getBoundingClientRect(); renderer.setSize(r.width,r.height,false); if(typeof composer!=='undefined'&&composer){ composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(r.width,r.height); } camera.aspect=r.width/r.height; camera.updateProjectionMatrix(); fitVenue();}
 new ResizeObserver(resize).observe($('#stage')); resize();
