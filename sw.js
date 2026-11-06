@@ -1,5 +1,5 @@
 // Decor 3D offline support. VERSION changes with every release: the app then shows "New version ready – Reload". Designs are kept.
-const VERSION='1.3';
+const VERSION='1.4';
 const CACHE='decor3d-'+VERSION;
 const LOCAL=['./','./index.html','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png','./icon-1024.png','./icon-maskable-512.png'];
 const CDN=[
