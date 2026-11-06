@@ -51,7 +51,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--ui);overflow:hidden;
 .brand b{font-size:16px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .brand span{font-family:var(--mono);font-size:11px;color:var(--muted)}
 #ver{display:none}
-@media (max-width:899px){#searchBtn{display:none}}
+@media (max-width:899px){#trayBtn{display:none}}
 #menubar{display:none}
 #toolbar{display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;background:var(--tool);border-bottom:1px solid var(--line);z-index:6;padding-block:3px;
   padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}
@@ -402,7 +402,7 @@ body.focus #focusExit{display:grid}
 <div id="app">
   <div id="titlebar">
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
-    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.2</span><span id="status">Opening…</span></div>
+    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.3</span><span id="status">Opening…</span></div>
     <button class="ibtn" id="designsBtn" aria-label="My designs" title="My designs"><svg class="i"><use href="#i-folder"/></svg></button>
     <button class="ibtn" id="searchBtn" aria-label="Search tools" title="Search tools (Shift+S)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="ibtn" id="undo" aria-label="Undo" title="Undo (Cmd+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
@@ -579,9 +579,9 @@ body.focus #focusExit{display:grid}
     </div>
     <div class="sheet" id="sheetSearch" role="dialog" aria-label="Search tools">
       <div class="grab"></div>
-      <div class="top"><h3>Search tools</h3><button class="ibtn" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
-      <input id="searchIn" class="txt" type="search" placeholder="Type a tool, e.g. push, arc, layer" autocomplete="off" style="margin-bottom:12px">
-      <div class="grid2" id="searchList"></div>
+      <div class="top"><h3>Search</h3><button class="ibtn" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <input id="searchIn" class="txt" type="search" placeholder="Search items, tools, colours… e.g. chair, mandap, gold, push" autocomplete="off" style="margin-bottom:12px">
+      <div id="searchList"></div>
     </div>
 
     <div class="sheet" id="sheetDel" role="dialog" aria-label="Confirm delete">
@@ -1077,7 +1077,7 @@ const groups={
   views:[['orbit','Orbit','orbit'],['scenes','Scenes','film',true],['tour','Play tour','play',true],['styles','Styles','sun',true],['export','Picture','download',true],['pan','Pan','pan'],['zoom','Zoom','zoom'],['walk','Walk','walk'],['vfit','Fit all','fit',true],['viso','Iso','cube',true],['vtop','Top','top',true],['vfront','Front','front',true],['vright','Right','front',true],['vback','Back','front',true],['vleft','Left','front',true],['xray','X-ray','xray',true],['backedges','Back edges','cube',true],['axes','Axes','edit',true]]
 };
 const keys={rotate:'Q',walk:'W',eraser:'E',rect:'R',tape:'T',axes:'Y',orbit:'O',push:'P',arc:'A',scale:'S',offset:'F',pan:'H',backedges:'K',line:'L',zoom:'Z',xray:'X',circle:'C',paint:'B',move:'M',makecomp:'G',vtop:'F2',vfront:'F3',vright:'F4',vback:'F5',vleft:'F6',viso:'F8'};
-const hints={seat:'Tap points along where the seats go, then tap <b>Place seats</b>. Use Seat options to pick chairs, sofas or tables.',select:'Tap an item to select it. Long-press for options. Drag to look around.',
+const hints={_multi:'',seat:'Tap points along where the seats go, then tap <b>Place seats</b>. Use Seat options to pick chairs, sofas or tables.',select:'Tap an item to select it. To pick several: tap Multi-select, or Shift/Ctrl-click. Drag to look around.',
   lasso:'Draw a loop around items to select them all.',
   line:'Tap points to draw. Tap the first point to close the shape.',
   rect:'Drag to draw a rectangle, or type <b>12\',8\'</b> and press Done.',
@@ -1109,7 +1109,7 @@ function renderToolOpts(){
     mk('fin',tool==='line'?'Close shape':'Make sweep','check',true,()=>tool==='line'?finishLine():finishFmPath()); }
   if(tool==='seat'){ mk('so','Seat options…','person',false,openSeat); mk('sf','Fill a shape','rect',seatCfg.mode==='fill',()=>{ seatCfg.mode='fill'; saveSeatCfg(); cancelDraft(); setHint('Tap a shape you drew to fill it with seats.'); renderSub(); }); mk('sl','Along a line','line',seatCfg.mode==='line',()=>{ seatCfg.mode='line'; saveSeatCfg(); cancelDraft(); setHint(hints.seat); renderSub(); }); mk('se','Around edge','offset',seatCfg.mode==='edge',()=>{ seatCfg.mode='edge'; saveSeatCfg(); cancelDraft(); setHint('Tap a shape to put seats around its edge.'); renderSub(); });
     if(seatCfg.mode==='line'){ mk('sc','Smooth curve','arc',seatCfg.curve==='on',()=>{ seatCfg.curve=seatCfg.curve==='on'?'off':'on'; saveSeatCfg(); renderSub(); }); if(draft&&draft.pts&&draft.pts.length>=2) mk('fin','Place seats','check',true,finishSeatPath); } }
-  if(tool==='select'||tool==='lasso'){ mk('multi','Multi-select','plus',multiMode,()=>doAction('multi')); mk('selall','Select all','select',false,selectAll); mk('more','Options…','more',false,()=>selected?openMore():bad('Select an item first.')); }
+  if(tool==='select'||tool==='lasso'){ mk('multi','Multi-select','plus',multiMode,()=>doAction('multi')); mk('selall','Select all','select',false,selectAll); if(selected) mk('same','Select all like this','select',false,selectSame); mk('more','Options…','more',false,()=>selected?openMore():bad('Select an item first.')); }
   if(tool==='poly'){ [3,4,5,6,8,12].forEach(n=>mk('ps'+n,n+' sides','poly',polySides===n,()=>{polySides=n; renderSub(); buzz(6);})); }
   if(tool==='paint'){ mk('mats','All materials…','swatch',false,openMaterials); }
   if(tool==='walk'||tool==='orbit'||tool==='pan'||tool==='zoom'){ mk('fit','Zoom extents','fit',false,()=>goView('fit')); }
@@ -1378,7 +1378,7 @@ canvas.addEventListener('pointerup',e=>{
   if(tool==='offset'){ if(p&&p.item.userData.kind==='solid') makeOffset(p.item,offsetDist); else if(p) bad('Offset works on drawn shapes and the stage.'); return; }
   if(['orbit','pan','zoom','walk'].includes(tool)) return;
   if(tool==='paint'){ if(p){ if(p.item.userData.locked) return bad('This item is locked. Unlock it first.'); doPaint(p.item,paintSpec); } return; }
-  select(p?p.item:null,(multiMode||e.shiftKey)&&!!p);
+  select(p?p.item:null,(multiMode||e.shiftKey||e.ctrlKey||e.metaKey)&&!!p);
 });
 canvas.addEventListener('pointercancel',()=>{ clearTimeout(lp); if(pdrag) endPush(); if(lassoPts){lassoPts=null; lassoEl.setAttribute('points',''); controls.enabled=true;}
   if(draft&&['rect','circle','poly'].includes(draft.kind)) cancelDraft(); wdrag=null; if(zdrag){zdrag=null; controls.enabled=true;} });
@@ -1681,14 +1681,27 @@ const groupOf=id=>Object.keys(groups).find(g=>groups[g].some(x=>x[0]===id));
 function runTool(id){ const g=groupOf(id); const def=groups[g].find(x=>x[0]===id);
   if(group!==g){ group=g; $$('[data-group]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.group===g)); }
   if(def[3]){ doAction(id); renderSub(); } else setTool(id); }
-function renderSearch(){ const q=$('#searchIn').value.trim().toLowerCase(), list=$('#searchList'); list.innerHTML='';
-  Object.keys(groups).forEach(g=>groups[g].forEach(([id,label,icon])=>{ if(id==='layers2') return; if(q&&!label.toLowerCase().includes(q)&&!g.includes(q)) return;
-    const b=document.createElement('button'); b.className='row-btn'; b.innerHTML=`${ico(icon)}<span>${label}<small>${g}${keys[id]?' · '+keys[id]:''}</small></span>`;
-    b.onclick=()=>{closeSheets(); runTool(id);}; list.appendChild(b); }));
-  if(!list.children.length) list.innerHTML='<div class="empty" style="grid-column:1/-1">No tool matches that. Try "push", "arc" or "layer".</div>'; }
+function renderSearch(){ const q=$('#searchIn').value.trim(), list=$('#searchList');
+  const tools=[]; Object.keys(groups).forEach(g=>groups[g].forEach(([id,label,icon])=>{ if(id!=='layers2') tools.push({id,label,icon,g}); }));
+  const T=q?smartFilter(tools,q,t=>[t.label+' '+t.id,t.g]):tools.slice(0,12);
+  const D=q?smartFilter(CATALOG.filter(d=>d.cat!=='_hidden'),q,catText):[];
+  const L=q?smartFilter(SET.lib||[],q,l=>l.name):[];
+  const Ms=q?smartFilter(M,q,m=>[m.name,m.cat]):[];
+  let h='';
+  if(D.length||L.length){ h+=`<h4>Decor items <small style="color:var(--muted);font-weight:500">${D.length+L.length}</small></h4><div class="cgrid">`+L.map(l=>`<div class="ccard"><button class="cbtn" data-slib="${l.id}"><span class="cico">${ico('save')}</span><span class="cn">${esc(l.name)}</span><small>My item</small></button></div>`).join('')
+    +D.slice(0,60).map(d=>`<div class="ccard"><button class="cbtn" data-sadd="${d.type}">${thumbHTML(d)}<span class="cn">${esc(d.name)}</span><small>${esc(d.cat)}</small></button></div>`).join('')+'</div>'; }
+  if(T.length) h+=`<h4>Tools</h4><div class="grid2">`+T.map(t=>`<button class="row-btn" data-stool="${t.id}">${ico(t.icon)}<span>${esc(t.label)}<small>${esc(t.g)}${keys[t.id]?' · '+keys[t.id]:''}</small></span></button>`).join('')+'</div>';
+  if(Ms.length) h+=`<h4>Colours &amp; materials</h4><div class="grid2">`+Ms.slice(0,16).map(m=>`<button class="row-btn" data-smat="${m.id}"><span class="sw" style="${swatchStyle(m)};width:28px;height:28px;border-radius:8px;flex:none"></span><span>${esc(m.name)}<small>${esc(m.cat)} · tap to paint</small></span></button>`).join('')+'</div>';
+  list.innerHTML=h||`<div class="empty">Nothing matches "${esc(q)}". Try chair, sofa, mandap, LED, flowers, gold or push.</div>`;
+  $$('[data-sadd]').forEach(b=>b.onclick=()=>{ closeSheets(); addCatalogItem(b.dataset.sadd); });
+  $$('[data-slib]').forEach(b=>b.onclick=()=>{ const l=(SET.lib||[]).find(x=>x.id===b.dataset.slib); closeSheets(); if(l){ const o=deserialize(l.data); const t=controls.target; o.position.x=snap(t.x); o.position.z=snap(t.z); applyLook(); push(addCmd(o)); select(o); markDirty(); toast(l.name+' added'); } });
+  $$('[data-stool]').forEach(b=>b.onclick=()=>{ closeSheets(); runTool(b.dataset.stool); });
+  $$('[data-smat]').forEach(b=>b.onclick=()=>{ const m=specById(b.dataset.smat); closeSheets(); runTool('paint'); setPaint(m); });
+  queueThumbs('#searchList'); }
 function openSearch(){ $('#searchIn').value=''; renderSearch(); openSheet('sheetSearch'); setTimeout(()=>$('#searchIn').focus(),250); }
 $('#searchIn').addEventListener('input',renderSearch);
 $('#searchIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const f=$('#searchList button'); f&&f.click(); } });
+let srT=null; $('#searchIn').addEventListener('input',()=>{ clearTimeout(srT); });
 $('#searchBtn').onclick=openSearch;
 
 /* keyboard shortcuts (same letters as SketchUp) */
@@ -2013,6 +2026,7 @@ function renderToolbar(){
   $$('[data-tb]').forEach(b=>{ const id=b.dataset.tb; const on=id===tool||(id==='dims'&&showDims)||(id==='xray'&&xray); b.setAttribute('aria-pressed',on); });
   const a=$('#toolbar [aria-pressed="true"][data-tb="'+tool+'"]'); if(a&&!isWide()){ const r=a.getBoundingClientRect(), br=bar.getBoundingClientRect(); if(r.left<br.left||r.right>br.right) a.scrollIntoView({inline:'center',block:'nearest'}); }
 }
+function selectSame(){ if(!selected) return; const u=selected.userData, key=u.kind==='param'?'t:'+u.type:'n:'+u.kind+':'+u.name; const l=items.filter(o=>o.visible&&(o.userData.kind==='param'?'t:'+o.userData.type:'n:'+o.userData.kind+':'+o.userData.name)===key); if(l.length<2){ toast('There is only one '+u.name+'.'); return; } selected=l[l.length-1]; multi=l; helper.visible=false; tc.detach(); refreshCard(); refreshMulti(); setHint(`${l.length} × ${esc(u.name)} selected`); toast(`${l.length} × ${u.name} selected`); buzz(8); }
 function selectAll(){ const l=items.filter(o=>o.visible); if(!l.length) return; if(l.length===1) return select(l[0]); selected=l[l.length-1]; multi=l; helper.visible=false; tc.detach(); refreshCard(); refreshMulti(); setHint(`${l.length} items selected`); }
 const T=id=>()=>runTool(id);
 function setStyle(st){ look.style=st; applyLook(); markDirty(); renderSub(); }
@@ -3144,6 +3158,30 @@ const CAT_ORDER=['Mandaps','Stage','Backdrops','Entrance','LED & screens','Truss
 const CAT_ICON={'Mandaps':'decor','Stage':'rect','Backdrops':'front','Entrance':'decor','LED & screens':'image','Truss':'array','Partitions':'layers','Pillars':'front','Furniture':'group','Sound':'film','Lighting':'sun','Carpets':'rect','Props':'plus','Barricades & bar':'edit','Chairs':'person','Sofas':'group','Flowers':'decor','Fancy items':'sun'};
 const catDef=t=>CATALOG.find(c=>c.type===t);
 function defaultParams(def){ const o={}; def.params.forEach(x=>o[x.k]=x.def); return o; }
+
+/* ===================== Smart search: plurals, typos, Indian decor words ===================== */
+const SYN=[['chair','chairs','seat','seats','seating','kursi','chiavari','tiffany','banquet'],['sofa','sofas','couch','settee','lounge','loveseat','diwan','divan'],['table','tables','dining','buffet','cocktail'],
+ ['mandap','mandaps','mandapam','mandapa','pandiri','pandal','vedika','kalyana','muhurtham'],['stage','stages','platform','riser','dais','ramp'],['backdrop','backdrops','background','flex','wall','panel','print'],
+ ['entrance','entry','arch','gate','welcome','toran','torana','tunnel'],['led','screen','tv','display','projector','video'],['truss','goalpost','frame'],
+ ['light','lights','lighting','lamp','par','flood','spot','chandelier','jhoomar','fairy','bulb','glow'],['flower','flowers','floral','phool','pookalam','garland','mala','marigold','rose','jasmine','orchid','bouquet','petal'],
+ ['carpet','carpets','rug','runner','mat','aisle','floor'],['pillar','pillars','column','columns','pole','stambh','post'],['partition','drape','curtain','divider','screen','jaali'],
+ ['sound','speaker','speakers','dj','audio','mic','music','band','dhol'],['prop','props','fancy','decor','decoration'],['umbrella','chatri','chhatri'],['barricade','barrier','fence','stanchion','rope','bargate','queue'],
+ ['bar','counter','desk','stall'],['lantern','kandil','lanterns'],['diya','deepam','diyas','candle','candles'],['kalash','kalasam','pot','pots','matki'],['greenery','green','leaves','leaf','hedge','plant','tree'],
+ ['wedding','marriage','pelli','shaadi','reception'],['haldi','yellow','pasupu'],['mehendi','mehndi','henna'],['sangeet','dance'],['round','circle','circular'],['gold','golden'],['white','ivory'],['red','maroon'],['pink','rose']];
+const SYN_IX={}; SYN.forEach(g=>g.forEach(w=>{ (SYN_IX[w]=SYN_IX[w]||new Set()); g.forEach(x=>SYN_IX[w].add(x)); }));
+const stemW=w=>w.length>4&&w.endsWith('ies')?w.slice(0,-3)+'y':w.length>3&&/(ch|sh|x|ss)es$/.test(w)?w.slice(0,-2):w.length>3&&w.endsWith('s')&&!w.endsWith('ss')?w.slice(0,-1):w;
+function editLE(a,b,k){ if(Math.abs(a.length-b.length)>k) return false; const d=Array.from({length:a.length+1},(_,i)=>[i]); for(let j=1;j<=b.length;j++) d[0][j]=j;
+  for(let i=1;i<=a.length;i++){ let rowMin=1e9; for(let j=1;j<=b.length;j++){ d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1]) d[i][j]=Math.min(d[i][j],d[i-2][j-2]+1); rowMin=Math.min(rowMin,d[i][j]); } if(rowMin>k) return false; } return d[a.length][b.length]<=k; }
+const tokens=t=>String(t).toLowerCase().replace(/[^a-z0-9ఀ-౿ऀ-ॿ]+/g,' ').split(' ').filter(Boolean);
+/* score: 0 = no match; higher = better */
+function smartScore(query,text){ const qw=tokens(query); if(!qw.length) return 1; const fields=Array.isArray(text)?text:[text]; const fw=fields.map((f,i)=>[tokens(f).map(stemW),i===0?2:1]); let score=0;
+  for(const raw of qw){ const w=stemW(raw); const alts=new Set([w,raw]); (SYN_IX[raw]||SYN_IX[w]||[]).forEach(x=>alts.add(stemW(x))); let best=0;
+    for(const [tw,wt] of fw){ let fb=0; for(const t of tw){ for(const a of alts){ let v=0; if(t===a) v=a===w?10:6; else if(a.length>=3&&t.startsWith(a)) v=a===w?8:4; else if(a===w&&w.length>=5&&t.includes(a)) v=3;
+        else if(a===w&&w.length>=4&&t.length>=4&&editLE(w,t.slice(0,Math.min(t.length,w.length+1)),w.length>=7?2:1)) v=3; fb=Math.max(fb,v*wt); } } best+=fb; }
+    if(!best) return 0; score+=best; }
+  return score; }
+function smartFilter(list,query,textOf){ return list.map(x=>[x,smartScore(query,textOf(x))]).filter(r=>r[1]>0).sort((a,b)=>b[1]-a[1]).map(r=>r[0]); }
+const catText=d=>[d.name,d.cat];
 /* ===================== Seating layout: fill a shape, follow a line or curve ===================== */
 const SEAT_GROUPS={Chairs:CATALOG.filter(d=>d.cat==='Chairs'&&!(d.params.find(x=>x.k==='n')&&d.params.find(x=>x.k==='n').def>1)),Sofas:CATALOG.filter(d=>d.cat==='Sofas'),'Tables & sets':CATALOG.filter(d=>d.cat==='Furniture')};
 const SEAT_TYPES=[].concat(...Object.values(SEAT_GROUPS)).map(d=>d.type);
@@ -3243,11 +3281,11 @@ function renderCatalog(){
   if(!q&&catSel==='mine'){ renderLib($('#catGrid')); return; }
   const sizeTxt=def=>{ const p=defaultParams(def); const f=def.params.filter(x=>x.unit==='ft').slice(0,2).map(x=>ftin(p[x.k])).join(' × '); return f||def.params.map(x=>x.label+' '+p[x.k]).slice(0,1).join(''); };
   let items1;
-  if(q) items1=CATALOG.filter(d=>d.cat!=='_hidden'&&q.split(/\s+/).every(w=>(d.name+' '+d.cat).toLowerCase().includes(w)));
+  if(q) items1=smartFilter(CATALOG.filter(d=>d.cat!=='_hidden'),q,catText);
   else if(catSel==='fav') items1=SET.favs.map(catDef).filter(Boolean);
   else if(catSel==='recent') items1=SET.recent.map(catDef).filter(Boolean);
   else items1=CATALOG.filter(d=>d.cat===catSel);
-  const items2=(catSel==='fav'||catSel==='recent')&&!q?[]:LEGACY.filter(l=>q?l[1].toLowerCase().includes(q):l[2]===catSel);
+  const items2=(catSel==='fav'||catSel==='recent')&&!q?[]:(q?smartFilter(LEGACY,q,l=>[l[1],l[2]]):LEGACY.filter(l=>l[2]===catSel));
   const emptyMsg=catSel==='fav'&&!q?'No favourites yet. Tap the star next to any item to keep it here.':catSel==='recent'&&!q?'Items you add will show here.':'No item matches that. Try "mandap", "LED", "truss" or "chair".';
   $('#catGrid').innerHTML=items1.map(d=>`<div class="ccard"><button class="cbtn" data-cat-add="${d.type}" aria-label="Add ${esc(d.name)}">${thumbHTML(d)}<span class="cn">${esc(d.name)}</span><small>${esc(sizeTxt(d))}</small></button><button class="ibtn star${isFav(d.type)?' on':''}" data-fav="${d.type}" aria-label="${isFav(d.type)?'Remove from':'Add to'} favourites: ${esc(d.name)}" aria-pressed="${isFav(d.type)}">${ico('star')}</button></div>`).join('')
     +items2.map(l=>`<div class="ccard"><button class="cbtn" data-add="${l[0]}"><span class="cico">${ico(CAT_ICON[l[2]]||'plus')}</span><span class="cn">${esc(l[1])}</span><small>ready-made</small></button></div>`).join('')
@@ -3355,7 +3393,7 @@ function openSkpHelp(){ toast('A .skp file can only be opened by SketchUp. In Sk
 
 $('#daeFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importSketchUp(f).catch(err=>bad('Could not open that file: '+err.message)); e.target.value=''; });
 /* ===================== Round 4: settings, quotation, stock, PDF, favourites ===================== */
-const APP_VER='v1.2';
+const APP_VER='v1.3';
 const SET={rates:{},stock:{},favs:[],recent:[],lib:null,_u:0};
 async function settingsLoad(){
   let v=await idbReq('readonly',st=>st.get('settings'));
