@@ -1,0 +1,52 @@
+{
+  "name": "Decor 3D – Lalitha Event Decors",
+  "short_name": "Decor 3D",
+  "description": "Plan Indian event decor setups in 3D: mandaps, stages, backdrops, lighting and more, with quotations and floor plans.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#c2185b",
+  "theme_color": "#c2185b",
+  "icons": [
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "My designs",
+      "url": "./?open=designs"
+    },
+    {
+      "name": "Item list & quote",
+      "url": "./?open=quote"
+    }
+  ]
+}
