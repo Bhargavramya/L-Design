@@ -1,5 +1,5 @@
 // Decor 3D offline support. VERSION changes with every release: the app then shows "New version ready – Reload". Designs are kept.
-const VERSION='1.4';
+const VERSION='1.5';
 const CACHE='decor3d-'+VERSION;
 const LOCAL=['./','./index.html','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png','./icon-1024.png','./icon-maskable-512.png'];
 const CDN=[
@@ -15,7 +15,11 @@ const CDN=[
  "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/EffectComposer.js",
  "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/RenderPass.js",
  "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/ShaderPass.js",
- "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js"
+ "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js",
+ "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/OutlinePass.js",
+ "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/objects/Sky.js",
+ "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js",
+ "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/DRACOLoader.js"
 ];
 const OK_HOSTS=['cdn.jsdelivr.net','cdnjs.cloudflare.com','fonts.googleapis.com','fonts.gstatic.com'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(async c=>{ await c.addAll(LOCAL); await Promise.all(CDN.map(u=>c.add(u).catch(()=>{}))); })); });
