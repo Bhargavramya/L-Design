@@ -1,0 +1,125 @@
+name: Build Decor 3D apps (Windows, Mac, Android)
+
+# The apps open the live site, so they only need rebuilding when the app wrappers change.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - '.github/workflows/apps.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apps
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build Windows installer
+        working-directory: apps/desktop
+        shell: bash
+        run: |
+          mkdir -p build && cp ../../icon-1024.png build/icon.png
+          npm install --no-audit --no-fund
+          npx electron-builder --win --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: apps/desktop/dist/Decor3D-Windows.exe
+          if-no-files-found: error
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build Mac app (Apple chip + Intel)
+        working-directory: apps/desktop
+        run: |
+          mkdir -p build && cp ../../icon-1024.png build/icon.png
+          npm install --no-audit --no-fund
+          npx electron-builder --mac --publish never
+          APP=$(find dist -maxdepth 2 -name "Decor 3D.app" | head -1)
+          echo "App: $APP"
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --deep "$APP"
+          mkdir -p dmg && cp -R "$APP" dmg/ && ln -s /Applications dmg/Applications
+          hdiutil create -volname "Decor 3D" -srcfolder dmg -ov -format UDZO dist/Decor3D-Mac.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          path: apps/desktop/dist/Decor3D-Mac.dmg
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Signing key
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS_SECRET: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS_SECRET" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/decor3d.jks"
+            echo "KS_PASS=$KS_PASS_SECRET" >> $GITHUB_ENV
+          else
+            echo "::warning::No saved Android signing key yet - using a one-time key. Add ANDROID_KEYSTORE_B64 and ANDROID_KEYSTORE_PASS secrets so app updates install over the old app."
+            P=$(openssl rand -hex 16)
+            keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/decor3d.jks" -storepass "$P" -keypass "$P" -alias decor3d -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Lalitha Event Decors, O=Lalitha Event Decors, C=IN"
+            echo "KS_PASS=$P" >> $GITHUB_ENV
+          fi
+          echo "KS_FILE=$RUNNER_TEMP/decor3d.jks" >> $GITHUB_ENV
+          echo "KS_ALIAS=decor3d" >> $GITHUB_ENV
+      - name: Build Android app
+        env:
+          APP_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          R=apps/android/app/src/main
+          mkdir -p $R/res/mipmap-xxxhdpi $R/assets
+          cp icon-192.png $R/res/mipmap-xxxhdpi/ic_launcher.png
+          cp icon-192.png $R/assets/icon.png
+          gradle -p apps/android assembleRelease --no-daemon --stacktrace
+          cp apps/android/app/build/outputs/apk/release/app-release.apk Decor3D-Android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: Decor3D-Android.apk
+          if-no-files-found: error
+
+  publish:
+    needs: [windows, mac, android]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Put the apps on the download page (release "apps")
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ls -la out
+          if [ -z "$(ls -A out 2>/dev/null)" ]; then echo "Nothing was built"; exit 1; fi
+          gh release view apps >/dev/null 2>&1 || gh release create apps --title "Decor 3D apps" --notes "Decor 3D for Windows, Mac and Android. The apps open the latest Decor 3D, so you only need to install once."
+          gh release upload apps out/* --clobber

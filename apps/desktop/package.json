@@ -1,0 +1,65 @@
+{
+  "name": "decor-3d",
+  "productName": "Decor 3D",
+  "version": "1.0.0",
+  "description": "Decor 3D for Lalitha Event Decors",
+  "author": "Lalitha Event Decors",
+  "homepage": "https://bhargavramya.github.io/L-Design/",
+  "main": "main.js",
+  "private": true,
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "com.lalithaeventdecors.decor3d",
+    "productName": "Decor 3D",
+    "copyright": "Lalitha Event Decors",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "offline.html",
+      "build/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "Decor3D-Windows.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Decor 3D",
+      "runAfterFinish": true
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.graphics-design",
+      "identity": null
+    },
+    "publish": null
+  },
+  "repository": "github:Bhargavramya/L-Design"
+}

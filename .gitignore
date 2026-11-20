@@ -1,0 +1,7 @@
+apps/desktop/node_modules/
+apps/desktop/dist/
+apps/android/.gradle/
+apps/android/app/build/
+apps/desktop/build/
+apps/android/app/src/main/res/mipmap-*/
+apps/android/app/src/main/assets/icon.png
