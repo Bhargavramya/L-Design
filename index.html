@@ -198,6 +198,79 @@ a.row-btn{text-decoration:none}
 .dlhelp{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5;background:var(--bg)}
 .dlhelp b{display:block;margin-bottom:4px;font-size:14px}
 .dlhelp ol{margin:6px 0 0;padding-left:20px}
+/* ---- v1.9 simple mode, home screen ---- */
+#stepBar,#easyBar{display:none}
+#titlebar #proBtn{width:auto;display:inline-flex;flex-direction:row;align-items:center;padding:0 12px;gap:6px;font:600 13px var(--ui);border:1px solid var(--line);border-radius:10px;margin-inline:4px}
+#proBtn span{white-space:nowrap}
+@media (max-width:600px){ #proBtn{padding:0 8px;margin-inline:2px} #proBtn .pl{display:none} body.simple #redo{display:none} }
+body.simple #menubar,body.simple #toolbar,body.simple #toolopts,body.simple #statusbar,body.simple #tray,body.simple #trayStrip,
+body.simple #menuBtn,body.simple #searchBtn,body.simple #trayBtn,body.simple #trayToggle,body.simple #focusBtn,body.simple #ver,body.simple #card,body.simple #focusExit,body.simple #toolset,body.simple .tsep{display:none!important}
+body.simple #stepBar{display:flex}
+body.simple #dTitle{cursor:pointer}
+#stepBar{gap:2px;justify-content:center;background:var(--surface);border-top:1px solid var(--line);z-index:6;
+  padding:4px max(6px,env(safe-area-inset-right,0px)) max(4px,env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+#stepBar button{flex:1;max-width:124px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:transparent;
+  color:var(--fg);font:600 12px var(--ui);border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#stepBar button .i{width:24px;height:24px}
+#stepBar button:active{transform:scale(.94);background:var(--accent-soft)}
+#stepBar button.go{color:var(--accent)}
+#easyBar{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:5;width:min(600px,calc(100% - 20px));background:var(--surface);
+  border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:10px 12px 10px;flex-direction:column;gap:8px}
+body.simple #easyBar.on{display:flex}
+.ebhead{display:flex;align-items:center;gap:8px;min-width:0}
+.ebhead b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.ebhead small{font-family:var(--mono);color:var(--muted);font-size:12px;white-space:nowrap}
+.ebacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(62px,1fr));gap:6px}
+.ebacts button{min-height:56px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--fg);font:600 12px var(--ui);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0 2px}
+.ebacts button:active{transform:scale(.95)}
+.ebacts .danger{color:var(--danger)}
+.ebtip{margin:0;font-size:12px;color:var(--muted);text-align:center}
+#home{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(28px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#home[hidden]{display:none}
+.hwrap{max-width:1100px;margin:0 auto}
+.hhead{display:flex;align-items:center;gap:12px;margin:2px 0 18px}
+.hlogo{width:44px;height:44px;border-radius:11px;flex:none}
+.hhead b{display:block;font-size:20px}
+.hhead small{color:var(--muted);font-size:13px}
+.hhead .sp{flex:1}
+.hnew{width:100%;display:flex;align-items:center;gap:14px;padding:18px;border:0;border-radius:16px;background:var(--accent);color:#fff;text-align:left;cursor:pointer;font:700 18px var(--ui)}
+.hnew .i{width:30px;height:30px;flex:none}
+.hnew small{display:block;font:500 13px var(--ui);opacity:.92;margin-top:3px}
+.hnew:active{transform:scale(.98)}
+.hrow{display:flex;align-items:baseline;justify-content:space-between;margin:26px 0 10px}
+.hrow h4{margin:0;font-size:16px}
+.hrow span{color:var(--muted);font-size:13px}
+#homeSearch{width:100%;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:0 14px;font-size:16px;margin-bottom:12px;-webkit-user-select:text;user-select:text}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.dcard{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dcard.now{border-color:var(--accent)}
+.dopen{display:flex;flex-direction:column;width:100%;border:0;background:transparent;color:var(--fg);padding:0 0 10px;text-align:left;cursor:pointer}
+.dopen:active{transform:scale(.98)}
+.dthumb{display:grid;place-items:center;aspect-ratio:16/10;background:var(--bg) center/cover no-repeat;color:var(--muted);border-bottom:1px solid var(--line)}
+.dthumb .i{width:34px;height:34px}
+.dname{font-weight:600;font-size:14px;padding:8px 44px 0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dopen small{padding:2px 44px 0 10px;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dmore{position:absolute;right:2px;bottom:4px}
+.nwsizes{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px}
+.nwsize{min-height:72px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--fg);text-align:left;padding:10px 12px;cursor:pointer;
+  display:flex;flex-direction:column;justify-content:center;gap:2px;font:600 14px var(--ui)}
+.nwsize small{font:500 12px var(--ui);color:var(--muted)}
+.nwsize[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.nwsize:active{transform:scale(.97)}
+.nwcustom{display:flex;gap:10px;margin-top:10px}
+.nwcustom[hidden]{display:none}
+.nwcustom label{flex:1;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.nwcustom input{height:46px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:0 12px;font-size:16px;-webkit-user-select:text;user-select:text}
+.nwguests{margin:10px 0 0;font-weight:600;font-size:14px}
+.nwdecor{display:flex;align-items:center;gap:10px;margin:14px 0;font-size:14px;min-height:44px;cursor:pointer}
+.nwdecor input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.linkbtn{background:none;border:0;color:var(--accent);font:600 14px var(--ui);min-height:44px;width:100%;cursor:pointer;margin-top:4px}
+.swgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.swgrid button{border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--fg);padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font:500 11px var(--ui);cursor:pointer}
+.swgrid i{display:block;width:40px;height:40px;border-radius:10px;background-size:cover;border:1px solid rgba(0,0,0,.08)}
+
 .field{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .field span{font-weight:500}
 .stepper{display:flex;align-items:center;gap:6px}
@@ -361,7 +434,7 @@ body.focus #focusExit{display:grid}
   <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
   <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
-  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol><symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></symbol><symbol id="i-mobile" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol><symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></symbol><symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol><symbol id="i-mobile" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></symbol>
   <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
   <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4 12a4 4 0 0 0 1 7.9z"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
@@ -426,16 +499,27 @@ body.focus #focusExit{display:grid}
   <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></symbol>
 </svg>
 
+<div id="home" hidden>
+  <div class="hwrap">
+    <div class="hhead"><img class="hlogo" src="icon-192.png" alt=""><div><b>Decor 3D</b><small>Lalitha Event Decors</small></div><span class="sp"></span>
+      <button class="ibtn" id="homeSet" aria-label="Settings"><svg class="i"><use href="#i-gear"/></svg></button></div>
+    <button class="hnew" id="homeNew"><svg class="i"><use href="#i-plus"/></svg><span>New design<small>Pick the event and hall size. The decor is added for you.</small></span></button>
+    <div class="hrow"><h4>My designs</h4><span id="homeCount"></span></div>
+    <input id="homeSearch" type="search" placeholder="Search designs" aria-label="Search designs" hidden>
+    <div class="hgrid" id="homeList"></div>
+  </div>
+</div>
 <div id="app">
   <div id="titlebar">
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
-    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.8</span><span id="status">Opening…</span></div>
-    <button class="ibtn" id="designsBtn" aria-label="My designs" title="My designs"><svg class="i"><use href="#i-folder"/></svg></button>
+    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.9</span><span id="status">Opening…</span></div>
+    <button class="ibtn" id="designsBtn" aria-label="Home: my designs" title="Home: my designs"><svg class="i"><use href="#i-folder"/></svg></button>
     <button class="ibtn" id="searchBtn" aria-label="Search tools" title="Search tools (Shift+S)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="ibtn" id="undo" aria-label="Undo" title="Undo (Cmd+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
     <button class="ibtn" id="redo" aria-label="Redo" title="Redo (Shift+Cmd+Z)" disabled><svg class="i"><use href="#i-redo"/></svg></button>
     <button class="ibtn" id="trayBtn" aria-label="Panels"><svg class="i"><use href="#i-tray"/></svg></button>
     <button class="ibtn" id="trayToggle" aria-label="Show or hide side panels" aria-pressed="true"><svg class="i"><use href="#i-tray"/></svg></button>
+    <button class="ibtn" id="proBtn" aria-pressed="false" title="Switch between the simple screen and all SketchUp-style tools"><svg class="i"><use href="#i-draw"/></svg><span>Pro<span class="pl"> tools</span></span></button>
     <button class="ibtn" id="setBtn" aria-label="Settings"><svg class="i"><use href="#i-gear"/></svg></button>
     <button class="ibtn" id="focusBtn" aria-label="Full-screen view" aria-pressed="false"><svg class="i"><use href="#i-expand"/></svg></button>
   </div>
@@ -444,6 +528,11 @@ body.focus #focusExit{display:grid}
   <div id="toolopts" hidden></div>
   <div id="main">
     <div id="stage">
+      <div id="easyBar" role="region" aria-label="Change the selected item">
+        <div class="ebhead"><b id="ebName"></b><small id="ebSize"></small><button class="ibtn" id="ebDone" aria-label="Done"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="ebacts" id="ebActs"></div>
+        <p class="ebtip" id="ebTip"></p>
+      </div>
     <canvas id="c"></canvas>
     <svg id="lasso"><polyline points=""/></svg>
     <div id="labels"></div>
@@ -477,6 +566,41 @@ body.focus #focusExit{display:grid}
       <div class="grab"></div>
       <div class="top"><h3>Keyboard shortcuts</h3><button class="ibtn" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
       <div id="keyList" class="list"></div>
+    </div>
+
+
+    <div class="sheet" id="sheetNew" role="dialog" aria-label="New design">
+      <div class="grab"></div>
+      <div class="top"><h3 id="nwTitle">New design</h3><button class="ibtn" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <div id="nwBody"></div>
+      <button class="btn main" id="nwGo">Create design</button>
+      <button class="linkbtn" id="nwDraw">Draw the exact hall shape instead</button>
+    </div>
+
+    <div class="sheet" id="sheetDMore" role="dialog" aria-label="Design options">
+      <div class="grab"></div>
+      <div class="top"><h3 id="dmTitle">Design</h3><button class="ibtn" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <div class="list">
+        <button class="row-btn" id="dmOpen"><svg class="i"><use href="#i-folder"/></svg><span>Open</span></button>
+        <button class="row-btn" id="dmRen"><svg class="i"><use href="#i-pencil"/></svg><span>Rename</span></button>
+        <button class="row-btn" id="dmDup"><svg class="i"><use href="#i-copy"/></svg><span>Make a copy<small>Start a new design from this one</small></span></button>
+        <button class="row-btn" id="dmDel" style="color:var(--danger)"><svg class="i"><use href="#i-trash"/></svg><span>Delete</span></button>
+      </div>
+    </div>
+
+    <div class="sheet" id="sheetColours" role="dialog" aria-label="Colours">
+      <div class="grab"></div>
+      <div class="top"><h3>Colours</h3><button class="ibtn" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <p class="dlnote">Tap a theme to colour the whole decor. Select one item first to colour only that item.</p>
+      <div id="themeList2" class="seg" style="flex-wrap:wrap"></div>
+      <h4>Light</h4>
+      <div class="seg" id="colLight"><button class="chip" data-v="day">Day</button><button class="chip" data-v="night">Night (lights glow)</button></div>
+    </div>
+
+    <div class="sheet" id="sheetIColour" role="dialog" aria-label="Item colour">
+      <div class="grab"></div>
+      <div class="top"><h3 id="icTitle">Colour</h3><button class="ibtn" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <div class="swgrid" id="icGrid"></div>
     </div>
 
     <div class="sheet" id="sheetSettings" role="dialog" aria-label="Settings">
@@ -764,6 +888,14 @@ body.focus #focusExit{display:grid}
     </div>
     </div>
   </div>
+  <nav id="stepBar" aria-label="Design steps">
+    <button id="sbHall"><svg class="i"><use href="#i-walls"/></svg>Hall</button>
+    <button id="sbStage"><svg class="i"><use href="#i-star"/></svg>Stage</button>
+    <button id="sbSeat"><svg class="i"><use href="#i-person"/></svg>Seating</button>
+    <button id="sbDecor" class="go"><svg class="i"><use href="#i-plus"/></svg>Decor</button>
+    <button id="sbColour"><svg class="i"><use href="#i-swatch"/></svg>Colours</button>
+    <button id="sbPhoto"><svg class="i"><use href="#i-image"/></svg>Photo</button>
+  </nav>
   <div id="statusbar">
     <div id="hint">Tap an item to select it. Drag to look around.</div>
     <button class="chip" id="inputChip" type="button">Mouse</button>
@@ -1125,7 +1257,7 @@ function attachTc(){ if(selected&&!multi.length&&!selected.userData.locked&&['mo
     tc.showX=tool!=='rotate'; tc.showZ=tool!=='rotate'; tc.showY=true; } else tc.detach(); }
 function worldSize(o){const b=new THREE.Box3().setFromObject(o); const s=new THREE.Vector3(); b.getSize(s); return {b,s};}
 function cardChip(id,label,icon,cls){return `<button class="chip ${cls||''}" data-act="${id}">${ico(icon)}${label}</button>`;}
-function refreshCard(){
+function refreshCard(){ if(typeof refreshEasy==='function') queueMicrotask(refreshEasy);
   const box=$('#card');
   if(multi.length>1){ box.hidden=false; helper.visible=false;
     const b=new THREE.Box3(); multi.forEach(o=>b.expandByObject(o)); const s=new THREE.Vector3(); b.getSize(s);
@@ -1888,7 +2020,7 @@ function snapshotDesign(){
     items:items.map(o=>serialize(o,true)),scenes:design.scenes,look:Object.assign({},look),venueBg:design.venueBg||null,compSeq,
     tagHidden:[...tagHidden],dims:showDims,axes:axesLines?axesLines.visible:true,
     photos:M.filter(m=>m.cat==='My photos').map(m=>({id:m.id,name:m.name,url:m.url,tile:m.tile})),
-    quote:design.quote||null,venue:design.venue||null,mirrorX:mirrorX||0,cam:planMode&&planPrev?{p:planPrev.p.toArray(),t:planPrev.t.toArray()}:{p:camera.position.toArray(),t:controls.target.toArray()}};
+    quote:design.quote||null,venue:design.venue||null,thumb:designThumb(),mirrorX:mirrorX||0,cam:planMode&&planPrev?{p:planPrev.p.toArray(),t:planPrev.t.toArray()}:{p:camera.position.toArray(),t:controls.target.toArray()}};
 }
 function clearScene(){
   cancelDraft(); tc.detach(); select(null); stopTour();
@@ -1902,7 +2034,7 @@ function loadDesign(d){
   tagHidden.clear(); (d.tagHidden||[]).forEach(t=>tagHidden.add(t));
   (d.items||[]).forEach(x=>{ try{ deserialize(x); }catch(e){ console.warn('Skipped an item that could not load',e); } });
   compSeq=Math.max(d.compSeq||3,3);
-  design={id:d.id,name:d.name||'Untitled setup',created:d.created||Date.now(),updated:d.updated||Date.now(),scenes:d.scenes||[],venueBg:d.venueBg||null,quote:d.quote||null,venue:d.venue||null}; try{ mirrorX=d.mirrorX||0; mirLast.clear(); }catch(e){}
+  design={id:d.id,name:d.name||'Untitled setup',created:d.created||Date.now(),updated:d.updated||Date.now(),scenes:d.scenes||[],venueBg:d.venueBg||null,quote:d.quote||null,venue:d.venue||null,thumb:d.thumb||null}; try{ mirrorX=d.mirrorX||0; mirLast.clear(); }catch(e){}
   Object.assign(look,{grid:false},d.look||{}); showDims=d.dims!==false; if(axesLines) axesLines.visible=d.axes!==false;
   if(design.venueBg) loadVenueTex(design.venueBg); else venueTex=null;
   if(d.cam){ camera.position.fromArray(d.cam.p); controls.target.fromArray(d.cam.t); }
@@ -2116,6 +2248,7 @@ async function boot(){
   else { loading=true; buildStarter(); loading=false; refreshVis(); applyAll(); $('#dTitle').textContent=design.name; await saveNow(false); }
   setStatus(idb?'Saved on this phone':'Not saving: storage blocked');
   initCloud();
+  try{ if(!new URLSearchParams(location.search).get('open')) openHome(); }catch(e){}
   try{ const o=new URLSearchParams(location.search).get('open'); if(o==='designs') setTimeout(openDesigns,400); if(o==='quote') setTimeout(openQuote,400); }catch(e){}
 }
 
@@ -3550,7 +3683,7 @@ function openSkpHelp(){ toast('A .skp file can only be opened by SketchUp. In Sk
 
 $('#daeFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importSketchUp(f).catch(err=>bad('Could not open that file: '+err.message)); e.target.value=''; });
 /* ===================== Round 4: settings, quotation, stock, PDF, favourites ===================== */
-const APP_VER='v1.8';
+const APP_VER='v1.9';
 const SET={rates:{},stock:{},favs:[],recent:[],lib:null,_u:0};
 async function settingsLoad(){
   let v=await idbReq('readonly',st=>st.get('settings'));
@@ -4907,9 +5040,9 @@ document.addEventListener('keydown',e=>{ if(!$('#vp').classList.contains('on')) 
 
 /* ---------- generate the 3D venue ---------- */
 const isVenueItem=o=>o.userData.tag==='Venue'&&o.userData.locked;
-async function generateVenue(){ if(vs.pts.length<3) return bad('Draw the hall first.'); const ex=items.filter(isVenueItem);
-  const doGen=async()=>{ closePlanner(); await new Promise(r=>setTimeout(r,20)); const keepDecor=!!design.venue&&ex.length>0;
-    if(!keepDecor){ await startNew(false); items.slice().forEach(o=>{ if(o.userData.kind==='person') removeItem(o); }); } else ex.forEach(removeItem);
+async function generateVenue(opt){ opt=opt||{}; if(vs.pts.length<3) return bad('Draw the hall first.'); const isNew=!!vs._new; delete vs._new; const ex=isNew?[]:items.filter(isVenueItem);
+  const doGen=async()=>{ closePlanner(); await new Promise(r=>setTimeout(r,20)); const keepDecor=!isNew&&!!design.venue&&ex.length>0;
+    if(!keepDecor){ if(!opt.fresh) await startNew(false); items.slice().forEach(o=>{ if(o.userData.kind==='person') removeItem(o); }); } else ex.forEach(removeItem);
     loading=true; const made=[]; const add=o=>{ o.userData.tag='Venue'; o.userData.locked=true; made.push(o); return o; };
     try{ const fl=add(makeRoomFloor(vs.pts,vs.floor)); fl.userData.name=vs.kind==='lawn'?'Lawn':'Hall floor';
       if(vs.kind==='hall'){ const ws=wallsFromChain(vs.pts,true,{h:vs.ceil,t:.75,col:0xf3e9e2,locked:true,names:vs.pts.map((_,i)=>'Wall '+(i+1))}); const segIdx=[]; vs.pts.forEach((p,i)=>{ const {L}=wallSeg(i); if(L>=.5) segIdx.push(i); });
@@ -4927,9 +5060,9 @@ async function generateVenue(){ if(vs.pts.length<3) return bad('Draw the hall fi
     }catch(err){ console.warn(err); }
     loading=false; design.venue=JSON.parse(JSON.stringify(vs)); if(vs.name) design.name=vs.name+' · '+(EVENTS.find(e=>e[0]===vs.event)||EVENTS[0])[1]; $('#dTitle').textContent=design.name;
     refreshVis(); applyAll(); push(addCmd(made)); const b=hallBox(); camera.position.set((b.x0+b.x1)/2,Math.max(30,(b.x1-b.x0)*.6),b.z1+(b.z1-b.z0)*.9); controls.target.set((b.x0+b.x1)/2,3,(b.z0+b.z1)/2); markDirty(); fitShadowSoon();
-    toast(`${vs.kind==='lawn'?'Lawn':'Hall'} made · ${capacityTxt().split(' · ')[0]}. Ceiling is hidden so you can see inside.`); buzz([10,40,10]); setTimeout(()=>openVenueWizard(0),400); };
-  if(ex.length) openDelete({title:'Replace the venue?',text:`The current walls, floor, stage and pillars (${ex.length} parts) will be replaced with the new plan. Your decor stays.`,onYes:doGen}); else doGen(); }
-$('#vpGen').onclick=generateVenue;
+    if(!opt.auto){ toast(`${vs.kind==='lawn'?'Lawn':'Hall'} made · ${capacityTxt().split(' · ')[0]}. Ceiling is hidden so you can see inside.`); buzz([10,40,10]); setTimeout(()=>openVenueWizard(0),400); } if(opt.after) await opt.after(); };
+  if(ex.length) return openDelete({title:'Replace the venue?',text:`The current walls, floor, stage and pillars (${ex.length} parts) will be replaced with the new plan. Your decor stays.`,onYes:doGen}); else return doGen(); }
+$('#vpGen').onclick=()=>generateVenue();
 
 /* ---------- decor steps after the hall is made ---------- */
 let vw={step:0,carpet:'fl-redcarpet',aisle:'fl-redcarpet',aw:5,layout:'theatre',chair:null,placed:{}};
@@ -4987,6 +5120,145 @@ $('#vwNext').onclick=()=>{ if(vw.step===2&&!vw.placed.seats) placeSeats(); if(vw
 $('#vpWiz').onclick=()=>{ closePlanner(); openVenueWizard(0); };
 
 (function(){ const d=catDef('lay-seating'); if(d&&!d.params.find(x=>x.k==='avoid')) d.params.push({k:'avoid',label:'',def:'[]',unit:'data'}); })();
+
+/* ===================== v1.9: Simple screen, Home, New design ===================== */
+let simple=true; try{ simple=localStorage.getItem('decor3d.mode')!=='pro'; }catch(e){}
+function setSimple(on,quiet){ simple=on; document.body.classList.toggle('simple',on); try{ localStorage.setItem('decor3d.mode',on?'simple':'pro'); }catch(e){}
+  $('#proBtn').setAttribute('aria-pressed',String(!on)); $('#proBtn>span').innerHTML=on?'Pro<span class="pl"> tools</span>':'Simple';
+  if(on){ if(tool!=='select') setTool('select'); closeMenus(); } refreshEasy(); setTimeout(resize,30);
+  if(!quiet){ toast(on?'Simple screen. Tap Pro tools any time for all menus and drawing tools.':'Pro tools on: all menus and drawing tools are back.'); buzz(8); } }
+$('#proBtn').onclick=()=>setSimple(!simple);
+$('#dTitle').onclick=()=>openName('Rename design',design.name,v=>{ design.name=v; $('#dTitle').textContent=v; markDirty(); toast('Renamed to '+v); });
+
+/* small picture of the design for the Home screen */
+let thumbCache={id:null,url:null,t:0};
+function designThumb(){ try{ if(planMode||$('#vp').classList.contains('on')||!$('#home').hidden) return thumbCache.id===design.id?thumbCache.url:(design.thumb||null);
+    if(thumbCache.id===design.id&&Date.now()-thumbCache.t<15000) return thumbCache.url;
+    renderFrame(); const src=renderer.domElement, W=320, H=200, c=document.createElement('canvas'); c.width=W; c.height=H;
+    const sw=src.width, sh=src.height, r=Math.max(W/sw,H/sh), w=W/r, h=H/r; c.getContext('2d').drawImage(src,(sw-w)/2,(sh-h)/2,w,h,0,0,W,H);
+    thumbCache={id:design.id,url:c.toDataURL('image/jpeg',.62),t:Date.now()}; design.thumb=thumbCache.url; return thumbCache.url; }catch(e){ return design.thumb||null; } }
+
+/* ---- Home screen ---- */
+let homeQ='', dmId=null;
+async function openHome(){ try{ const cur=await getDesign(design.id); if(items.length&&(dirty||!cur||!cur.thumb)) await saveNow(true); }catch(e){}
+  closeSheets(); closeMenus(); select(null); homeQ=''; $('#homeSearch').value=''; await renderHome(); $('#home').hidden=false; $('#home').scrollTop=0; }
+function closeHome(){ $('#home').hidden=true; setTimeout(resize,20); }
+async function renderHome(){ const list=(await listDesigns()).sort((a,b)=>(b.updated||0)-(a.updated||0));
+  $('#homeCount').textContent=list.length?`${list.length} saved`:''; $('#homeSearch').hidden=list.length<7;
+  const q=homeQ.trim().toLowerCase(); const show=q?list.filter(d=>(d.name+' '+evName(d)).toLowerCase().includes(q)):list;
+  $('#homeList').innerHTML=show.map(d=>{ const ev=evName(d);
+    return `<div class="dcard${d.id===design.id?' now':''}"><button class="dopen" data-hopen="${d.id}"><span class="dthumb"${d.thumb?` style="background-image:url(${d.thumb})"`:''}>${d.thumb?'':ico('cube')}</span><span class="dname">${esc(d.name)}</span><small>${fmtDay(d.updated)}${ev?' · '+esc(ev):''}</small></button><button class="ibtn dmore" data-hmore="${d.id}" aria-label="Options for ${esc(d.name)}">${ico('more')}</button></div>`; }).join('')
+    ||`<div class="empty">${q?'No design matches “'+esc(homeQ)+'”.':'No designs yet. Tap New design to start.'}</div>`;
+  $$('[data-hopen]').forEach(b=>{ b.onclick=()=>homeOpen(b.dataset.hopen); b.oncontextmenu=e=>{ e.preventDefault(); openDMore(b.dataset.hopen); }; });
+  $$('[data-hmore]').forEach(b=>b.onclick=()=>openDMore(b.dataset.hmore)); }
+function evName(d){ return d.venue?((EVENTS.find(e=>e[0]===d.venue.event)||[])[1]||''):''; }
+async function homeOpen(id){ const d=await getDesign(id); if(!d) return bad('That design could not be found.'); if(d.id!==design.id){ loadDesign(d); } closeHome(); toast('Opened '+d.name); buzz([10,40,10]); }
+async function openDMore(id){ const d=await getDesign(id); if(!d) return; dmId=id; $('#dmTitle').textContent=d.name; openSheet('sheetDMore'); buzz(8); }
+$('#dmOpen').onclick=()=>{ closeSheets(); homeOpen(dmId); };
+$('#dmRen').onclick=async()=>{ const d=await getDesign(dmId); if(!d) return;
+  openName('Rename design',d.name,async v=>{ if(d.id===design.id){ design.name=v; $('#dTitle').textContent=v; await saveNow(true); } else { d.name=v; d.updated=Date.now(); await putDesign(d); queueCloud(d); } toast('Renamed to '+v); renderHome(); }); };
+$('#dmDup').onclick=async()=>{ const d=dmId===design.id?await saveNow(false):await getDesign(dmId); if(!d) return; closeSheets();
+  const c=JSON.parse(JSON.stringify(d)); c.id=newId(); c.name=d.name+' copy'; c.created=c.updated=Date.now(); await putDesign(c); queueCloud(c); toast('Made '+c.name); buzz([10,40,10]); renderHome(); };
+$('#dmDel').onclick=async()=>{ const d=await getDesign(dmId); if(!d) return; closeSheets();
+  setTimeout(()=>openDelete({title:`Delete ${d.name}?`,text:`The design "${d.name}" with its ${(d.items||[]).length} items will be removed from this device and your backup. Type the design name to confirm. You can undo for 5 seconds.`,typed:d.name,
+    onYes:async()=>{ await delDesign(d.id); if(cloud) cloud.doc(`data/users/${uid}/design-${d.id}`).delete().catch(()=>{});
+      if(d.id===design.id){ const rest=(await listDesigns()).sort((a,b)=>(b.updated||0)-(a.updated||0)); if(rest[0]) loadDesign(rest[0]); else await startNew(false); }
+      renderHome(); toast(d.name+' deleted',async()=>{ await putDesign(d); queueCloud(d); toast('Restored '+d.name); renderHome(); }); buzz([40,30,40]); }}),60); };
+$('#homeNew').onclick=()=>openNewSheet('new');
+$('#homeSet').onclick=()=>openSettings();
+$('#homeSearch').oninput=e=>{ homeQ=e.target.value; renderHome(); };
+$('#designsBtn').onclick=()=>{ openHome(); buzz(6); };
+
+/* ---- New design / change hall: 3 easy questions ---- */
+const NW_SIZES=[['s',40,30,'Small'],['m',60,40,'Medium'],['l',80,50,'Large'],['xl',100,70,'Extra large'],['c',0,0,'My size']];
+let nw={mode:'new',event:'pelli',kind:'hall',size:'m',L:70,W:45,decor:true};
+const guestsFor=(L,W)=>Math.max(10,Math.round(L*W*.93/7/10)*10);
+function openNewSheet(mode){ nw.mode=mode; const v=design.venue;
+  if(mode==='hall'&&v){ nw.event=v.event||'pelli'; nw.kind=v.kind||'hall'; const xs=v.pts.map(p=>p[0]), zs=v.pts.map(p=>p[1]); const L=Math.round(Math.max(...xs)-Math.min(...xs)), W=Math.round(Math.max(...zs)-Math.min(...zs));
+    const m=NW_SIZES.find(s=>s[1]===L&&s[2]===W); nw.size=m?m[0]:'c'; nw.L=L; nw.W=W; nw.decor=false; }
+  else if(mode==='new'){ nw.decor=true; }
+  $('#nwTitle').textContent=mode==='hall'?'Change the hall':'New design'; $('#nwGo').textContent=mode==='hall'?'Update hall':'Create design';
+  renderNew(); closeHome(); openSheet('sheetNew'); buzz(8); }
+function nwDims(){ const s=NW_SIZES.find(x=>x[0]===nw.size); return s&&s[0]!=='c'?[s[1],s[2]]:[nw.L,nw.W]; }
+function renderNew(){
+  $('#nwBody').innerHTML=`<h4>1. What is the event?</h4>`+vchips('nwEv',EVENTS.map(e=>[e[0],e[1]]),nw.event)
+   +`<h4>2. Where?</h4>`+vchips('nwKind',[['hall','Indoor function hall'],['lawn','Open lawn / ground']],nw.kind)
+   +`<h4>3. How big is the ${nw.kind==='lawn'?'ground':'hall'}?</h4><div class="nwsizes" id="nwSizes">${NW_SIZES.map(s=>`<button class="nwsize" data-sz="${s[0]}" aria-pressed="${s[0]===nw.size}">${s[3]}<small>${s[0]==='c'?'Type length and width':`${s[1]}' × ${s[2]}' · about ${guestsFor(s[1],s[2])} guests`}</small></button>`).join('')}</div>`
+   +`<div class="nwcustom" id="nwCustom"${nw.size==='c'?'':' hidden'}><label>Length (feet)<input id="nwL" inputmode="decimal" value="${nw.L}"></label><label>Width (feet)<input id="nwW" inputmode="decimal" value="${nw.W}"></label></div>`
+   +`<p class="nwguests" id="nwGuests"></p>`
+   +`<label class="nwdecor"><input type="checkbox" id="nwDecor"${nw.decor?' checked':''}> Add ready decor: stage set, chairs, carpet, entrance and lights</label>`;
+  bindChipsVW('nwEv',v=>{ nw.event=v; }); bindChipsVW('nwKind',v=>{ nw.kind=v; renderNew(); });
+  $$('[data-sz]').forEach(b=>b.onclick=()=>{ nw.size=b.dataset.sz; $$('[data-sz]').forEach(x=>x.setAttribute('aria-pressed',x===b)); $('#nwCustom').hidden=nw.size!=='c'; if(nw.size==='c') $('#nwL').focus(); nwGuests(); buzz(6); });
+  ['nwL','nwW'].forEach(id=>$('#'+id).oninput=()=>{ const n=parseFloat($('#'+id).value); if(n>0){ if(id==='nwL') nw.L=n; else nw.W=n; } nwGuests(); });
+  $('#nwDecor').onchange=e=>{ nw.decor=e.target.checked; buzz(6); }; nwGuests(); }
+function nwGuests(){ const [L,W]=nwDims(); $('#nwGuests').textContent=L>0&&W>0?`${L}' × ${W}' ${nw.kind==='lawn'?'ground':'hall'} · about ${guestsFor(L,W)} guests in chairs`:''; }
+function hallSpec(L,W){ const s=VS_DEF(); s.kind=nw.kind; s.event=nw.event; const x=L/2, z=W/2; s.pts=[[-x,-z],[x,-z],[x,z],[-x,z]];
+  const sw=Math.max(12,Math.min(40,Math.round(L*.32/2)*2)), sd=Math.max(8,Math.min(16,Math.round(W*.24))); s.stage={x:0,z:+(-z+sd/2).toFixed(2),w:sw,d:sd,h:3};
+  s.doors=[{wall:2,t:.5,w:Math.min(10,Math.max(6,Math.round(L*.1))),k:'entrance'},{wall:1,t:.75,w:4,k:'door'}];
+  if(nw.kind==='lawn'){ s.floor='fl-grass'; } if(design.venue&&nw.mode==='hall'){ s.floor=design.venue.floor||s.floor; s.wall=design.venue.wall||s.wall; s.ceil=design.venue.ceil||s.ceil; }
+  return s; }
+async function nwCreate(){ const [L,W]=nwDims(); if(!(L>=15&&L<=600&&W>=15&&W<=600)){ $('#nwL')&&$('#nwL').focus(); return bad('Type a size between 15 and 600 feet.'); }
+  const spec=hallSpec(L,W), ev=nw.event, withDecor=nw.decor, mode=nw.mode; closeSheets();
+  const finish=async()=>{ if(withDecor) autoDecor(ev); if(mode==='new'){ design.name=((EVENTS.find(e=>e[0]===ev)||[])[1]||'Design')+' · '+new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'}); $('#dTitle').textContent=design.name; }
+    if(mode==='new'){ const b=hallBox(), dz=b.z1-b.z0, dx=b.x1-b.x0; const sr=$('#stage').getBoundingClientRect(), tv=Math.tan(camera.fov*PI/360), th=tv*(sr.width/Math.max(1,sr.height)), dist=Math.max(dx/2/th,dz*.8/tv)*1.12, ang=50*PI/180, cx=(b.x0+b.x1)/2, cz=(b.z0+b.z1)/2; controls.maxDistance=Math.max(controls.maxDistance,dist*1.6); controls.target.set(cx,0,cz); camera.position.set(cx,dist*Math.sin(ang),cz+dist*Math.cos(ang)); controls.update(); }
+    select(null); markDirty(); thumbCache.t=0; await saveNow(true); toast(withDecor?'Your design is ready. Tap any item to change it.':'Hall ready. Use Stage, Seating and Decor below to fill it.'); buzz([10,40,10]); };
+  if(mode==='new'){ await startNew(false); vs=spec; await generateVenue({fresh:true,auto:true}); await finish(); }
+  else { vs=spec; await generateVenue({fresh:true,auto:true,after:finish}); } }
+$('#nwGo').onclick=()=>nwCreate();
+$('#nwDraw').onclick=()=>{ const [L,W]=nwDims(); const spec=hallSpec(L>0?L:80,W>0?W:50); closeSheets(); if(nw.mode==='new') spec._new=true; openPlanner(spec); };
+
+/* fills a fresh hall with ready decor, using the Decor steps */
+function autoDecor(ev){ const lay={reception:'round',sangeet:'round',birthday:'round'}[ev]||'theatre';
+  vw={step:0,carpet:'fl-redcarpet',aisle:'fl-redcarpet',aw:5,layout:lay,chair:null,placed:{}};
+  const step=i=>{ vw.step=i; renderVW(); };
+  try{ step(0); step(1); const sb=$('#vwBody [data-vwp]'); if(sb) sb.click();
+    step(2); placeSeats(); step(3); const eb=$('#vwBody [data-vwe]'); if(eb) eb.click(); placeLights('stage'); }catch(e){ console.warn('autoDecor',e); }
+  vw.placed={}; vw.step=0; select(null); }
+
+/* ---- bottom step bar ---- */
+function needVenue(){ if(design.venue) return true; toast('First set up the hall.'); openNewSheet('hall'); return false; }
+$('#sbHall').onclick=()=>openNewSheet('hall');
+$('#sbStage').onclick=()=>{ if(needVenue()) openVenueWizard(1); };
+$('#sbSeat').onclick=()=>{ if(needVenue()) openVenueWizard(2); };
+$('#sbDecor').onclick=()=>doAction('add');
+$('#sbColour').onclick=()=>{ renderThemes($('#themeList2')); $$('#colLight [data-v]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.v==='night')===!!look.night)); openSheet('sheetColours'); buzz(6); };
+$$('#colLight [data-v]').forEach(b=>b.onclick=()=>{ const n=b.dataset.v==='night'; if(!!look.night!==n){ look.night=n; applyNight(); markDirty(); } $$('#colLight [data-v]').forEach(x=>x.setAttribute('aria-pressed',x===b)); buzz(6); });
+$('#sbPhoto').onclick=()=>openExport();
+
+/* ---- easy item editing ---- */
+function refreshEasy(){ const bar=$('#easyBar'); const o=selected; const show=simple&&o&&items.includes(o)&&multi.length<2&&$('#home').hidden;
+  bar.classList.toggle('on',!!show); if(!show) return; const u=o.userData, sz=u.size||{w:0,d:0,h:0}, sc=o.scale;
+  $('#ebName').textContent=u.name; $('#ebSize').textContent=`${ftin(sz.w*Math.abs(sc.x))} × ${ftin(sz.d*Math.abs(sc.z))} × ${ftin(sz.h*Math.abs(sc.y))}`;
+  const B=(id,ic,lb,cls)=>`<button data-eb="${id}"${cls?` class="${cls}"`:''}>${ico(ic)}${lb}</button>`;
+  let h='';
+  if(u.locked){ h=B('colour','paint','Colour')+B('hall','walls','Change hall'); $('#ebTip').textContent='This is part of the hall, so it stays in place.'; }
+  else { h=B('bigger','plus','Bigger')+B('smaller','minus','Smaller')+B('turn','rotate','Turn')+B('copy','copy','Copy')+B('colour','paint','Colour')+(u.kind==='param'?B('size','scale','Size'):'')+B('del','trash','Delete','danger');
+    $('#ebTip').textContent='Drag it with your finger or mouse to move it.'; }
+  $('#ebActs').innerHTML=h; $$('#ebActs [data-eb]').forEach(b=>b.onclick=()=>easyAct(b.dataset.eb)); }
+function xfCmd(o,before){ const after=xfState(o); push({undo(){setXf(o,before); afterChange();},redo(){setXf(o,after); afterChange();}}); markDirty(); afterChange(); }
+function easyAct(k){ const o=selected; if(!o) return; buzz(8);
+  if(k==='bigger'||k==='smaller'){ const b=xfState(o), f=k==='bigger'?1.1:1/1.1; if(k==='smaller'&&Math.abs(o.scale.x)<.15) return bad('It is already very small.'); o.scale.multiplyScalar(f); xfCmd(o,b); return; }
+  if(k==='turn'){ const b=xfState(o); o.rotation.y-=PI/4; xfCmd(o,b); return; }
+  if(k==='copy') return itemAction('copy'); if(k==='del') return itemAction('del'); if(k==='size') return itemAction('editsize');
+  if(k==='hall') return openNewSheet('hall');
+  if(k==='colour'){ const list=M.filter(s=>s.cat==='Colours').concat(M.filter(s=>s.cat==='Fabric').slice(0,12));
+    $('#icTitle').textContent='Colour for '+o.userData.name;
+    $('#icGrid').innerHTML=list.map(s=>`<button data-ic="${s.id}" aria-label="${esc(s.name)}"><i style="${swatchStyle(s)}"></i>${esc(s.name)}</button>`).join('');
+    $$('#icGrid [data-ic]').forEach(b=>b.onclick=()=>{ const s=specById(b.dataset.ic); if(selected&&s){ doPaint(selected,s); markDirty(); toast(o.userData.name+' is now '+s.name); } closeSheets(); });
+    openSheet('sheetIColour'); } }
+$('#ebDone').onclick=()=>{ select(null); buzz(6); };
+/* drag the selected item to move it (simple screen) */
+let ebDrag=null;
+window.addEventListener('pointerdown',e=>{ if(!simple||e.target!==canvas||tool!=='select'||!e.isPrimary||e.button>0) return; const o=selected; if(!o||o.userData.locked||multi.length) return;
+  const pk=pickItem(e); if(!pk||pk.item!==o) return; const y=o.position.y, p=planePoint(e,y); if(!p) return;
+  ebDrag={o,before:xfState(o),dx:o.position.x-p.x,dz:o.position.z-p.z,y,moved:false,id:e.pointerId,x0:e.clientX,y0:e.clientY}; controls.enabled=false;
+  try{ canvas.setPointerCapture(e.pointerId); }catch(_){ } e.stopPropagation(); e.preventDefault(); },true);
+window.addEventListener('pointermove',e=>{ if(!ebDrag||e.pointerId!==ebDrag.id) return; e.stopPropagation();
+  if(!ebDrag.moved&&Math.hypot(e.clientX-ebDrag.x0,e.clientY-ebDrag.y0)<6) return; ebDrag.moved=true;
+  const p=planePoint(e,ebDrag.y); if(!p) return; const o=ebDrag.o; o.position.x=Math.round((p.x+ebDrag.dx)*4)/4; o.position.z=Math.round((p.z+ebDrag.dz)*4)/4; helper.setFromObject(o); csDirty=true; },true);
+const ebEnd=e=>{ if(!ebDrag||e.pointerId!==ebDrag.id) return; e.stopPropagation(); const d=ebDrag; ebDrag=null; controls.enabled=true; if(d.moved){ xfCmd(d.o,d.before); buzz(8); } };
+window.addEventListener('pointerup',ebEnd,true); window.addEventListener('pointercancel',ebEnd,true);
+setSimple(simple,true);
 
 /* ===== loop ===== */
 function resize(){const r=$('#stage').getBoundingClientRect(); renderer.setSize(r.width,r.height,false); if(typeof composer!=='undefined'&&composer){ composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(r.width,r.height); } camera.aspect=r.width/r.height; camera.updateProjectionMatrix(); fitVenue();}
