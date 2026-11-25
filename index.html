@@ -512,7 +512,7 @@ body.focus #focusExit{display:grid}
 <div id="app">
   <div id="titlebar">
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
-    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.9</span><span id="status">Opening…</span></div>
+    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.10</span><span id="status">Opening…</span></div>
     <button class="ibtn" id="designsBtn" aria-label="Home: my designs" title="Home: my designs"><svg class="i"><use href="#i-folder"/></svg></button>
     <button class="ibtn" id="searchBtn" aria-label="Search tools" title="Search tools (Shift+S)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="ibtn" id="undo" aria-label="Undo" title="Undo (Cmd+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
@@ -954,15 +954,24 @@ sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera,{left:-35,rig
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshStandardMaterial({color:0xffffff,roughness:1}));
 floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
 let grid, axesLines;
+/* SketchUp-style sky and ground: blue sky fading to a pale horizon, flat ground colour below the horizon */
+const SU={sky:'#7fa7d1',horizon:'#dde7ef',ground:'#cdc9bb',groundFar:'#c4c0b1',edge:0x000000};
+const suDome=new THREE.Mesh(new THREE.SphereGeometry(1,48,24),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,depthTest:false,fog:false,toneMapped:false,
+  uniforms:{sky:{value:new THREE.Color(SU.sky)},hor:{value:new THREE.Color(SU.horizon)},gr:{value:new THREE.Color(SU.ground)},grf:{value:new THREE.Color(SU.groundFar)}},
+  vertexShader:'varying vec3 vDir; void main(){ vDir=position; vec4 p=projectionMatrix*viewMatrix*vec4(cameraPosition+position*100.0,1.0); gl_Position=p.xyww; }',
+  fragmentShader:'uniform vec3 sky; uniform vec3 hor; uniform vec3 gr; uniform vec3 grf; varying vec3 vDir; void main(){ float y=normalize(vDir).y; vec3 c; if(y>=0.0){ c=mix(hor,sky,pow(clamp(y,0.0,1.0),0.55)); } else { c=mix(grf,gr,clamp(-y*3.0,0.0,1.0)); } gl_FragColor=vec4(c,1.0); }'}));
+suDome.frustumCulled=false; suDome.renderOrder=-1000; suDome.name='sketchup-sky'; scene.add(suDome);
+function suDomeOn(){ return (look.bg==='sky')&&!planMode&&!(typeof venueTex!=='undefined'&&venueTex&&design.venueBg)&&!(look.night&&!fastMode); }
 function applyTheme(){
   const bg=new THREE.Color(css('--scene')||'#efece8'); try{ setBackground(); }catch(e){ scene.background=bg; } floor.material.color=bg.clone().offsetHSL(0,0,-0.02);
   if(grid) scene.remove(grid);
   grid=new THREE.GridHelper(80,80,new THREE.Color(css('--grid')),new THREE.Color(css('--grid'))); grid.position.y=0.004; scene.add(grid);
   const vis=axesLines?axesLines.visible:true; if(axesLines) scene.remove(axesLines);
   axesLines=new THREE.Group(); axesLines.visible=vis;
-  [[[0,0.01,0],[60,0.01,0],'--red-axis',0],[[0,0.01,0],[-60,0.01,0],'--red-axis',1],[[0,0.01,0],[0,0.01,-60],'--green-axis',0],[[0,0.01,0],[0,0.01,60],'--green-axis',1],[[0,0,0],[0,40,0],'--blue-axis',0]].forEach(([a,b,c,d])=>{
-    const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]); const col=new THREE.Color(css(c));
-    const l=new THREE.Line(g,d?new THREE.LineDashedMaterial({color:col,dashSize:.35,gapSize:.35,transparent:true,opacity:.8}):new THREE.LineBasicMaterial({color:col,transparent:true,opacity:.85})); if(d) l.computeLineDistances(); axesLines.add(l);});
+  const AX={'--red-axis':'#e00000','--green-axis':'#00a000','--blue-axis':'#0000e0'};
+  [[[0,0.01,0],[2000,0.01,0],'--red-axis',0],[[0,0.01,0],[-2000,0.01,0],'--red-axis',1],[[0,0.01,0],[0,0.01,-2000],'--green-axis',0],[[0,0.01,0],[0,0.01,2000],'--green-axis',1],[[0,0,0],[0,2000,0],'--blue-axis',0]].forEach(([a,b,c,d])=>{
+    const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]); const col=new THREE.Color(AX[c]);
+    const l=new THREE.Line(g,d?new THREE.LineDashedMaterial({color:col,dashSize:.5,gapSize:.5}):new THREE.LineBasicMaterial({color:col})); if(d) l.computeLineDistances(); axesLines.add(l);});
   scene.add(axesLines);
 }
 applyTheme(); matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
@@ -1052,7 +1061,7 @@ function buildSolid(g){
   const sh=new THREE.Shape(pts.map(p=>new THREE.Vector2(p[0],-p[1])));
   const geo=new THREE.ExtrudeGeometry(sh,{depth:h,bevelEnabled:false,curveSegments:1});
   const m=new THREE.Mesh(geo,keep); m.name='body'; m.rotation.x=-Math.PI/2;
-  const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo,25),new THREE.LineBasicMaterial({color:0x3b2f3a,transparent:true,opacity:.45,depthTest:!backEdges}));
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo,25),new THREE.LineBasicMaterial({color:SU.edge,transparent:true,opacity:.9,depthTest:!backEdges}));
   e.rotation.x=-Math.PI/2; e.name='edges'; g.add(m,e); shadowAll(g);
   const xs=pts.map(p=>p[0]), zs=pts.map(p=>p[1]);
   g.userData.size={w:Math.max(...xs)-Math.min(...xs),d:Math.max(...zs)-Math.min(...zs),h:g.userData.h};
@@ -1482,7 +1491,7 @@ function commitOutline(worldPts,y,name,shape){
   if(Math.abs(area)<0.2){bad('Shape is too small. Draw it a bit bigger.'); return null;}
   if(area<0) worldPts=worldPts.slice().reverse();
   const xs=worldPts.map(p=>p[0]), zs=worldPts.map(p=>p[1]); const cx=(Math.min(...xs)+Math.max(...xs))/2, cz=(Math.min(...zs)+Math.max(...zs))/2;
-  const o=makeSolid(worldPts.map(p=>[p[0]-cx,p[1]-cz]),0.05,0xe8dcd4,name,shape); o.position.set(cx,y,cz); applyLook();
+  const o=makeSolid(worldPts.map(p=>[p[0]-cx,p[1]-cz]),0.05,0xffffff,name,shape); o.position.set(cx,y,cz); applyLook();
   push(addCmd(o)); select(o); buzz([10,40,10]); toast(name+' drawn. Use Push/Pull to give it height.');
   return o;
 }
@@ -1726,7 +1735,7 @@ function applyLook(){
   items.forEach(o=>o.traverse(m=>{
     if(m.isMesh&&m.material){ const r=realOf(m); if(r.emissive&&r.emissive.getHex()!==0){ m.material=r; return; }
       if(m.name==='flex'&&look.style!=='wire'&&look.style!=='mono'&&!xray){ m.material=r; return; } m.material=derivedMat(r); }
-    if(m.isLineSegments&&m.name==='edges'){ m.visible=look.edges||look.style==='mono'; m.material.depthTest=!backEdges; m.material.opacity=backEdges?.7:.45; m.renderOrder=backEdges?4:0; }
+    if(m.isLineSegments&&m.name==='edges'){ m.visible=look.edges||look.style==='mono'; m.material.depthTest=!backEdges; m.material.opacity=backEdges?.7:.9; m.renderOrder=backEdges?4:0; }
   }));
 }
 
@@ -2182,7 +2191,7 @@ function loadVenueTex(url){ const im=new Image(); const t=new THREE.Texture(im);
 function setBackground(){
   const bgc=new THREE.Color(css('--scene')||'#efece8');
   if(venueTex&&design.venueBg){ scene.background=venueTex; fitVenue(); floor.material=floorShadow; if(grid) grid.visible=false; }
-  else { floor.material=floorStd; if(grid) grid.visible=!!look.grid; floorStd.color.set((look.bg==='sky'||look.bg==='realsky')?new THREE.Color('#b3ada8'):bgc.clone().offsetHSL(0,0,-0.02)); scene.background=(look.bg==='sky'||look.bg==='realsky')?skyTex():bgc; }
+  else { floor.material=suDomeOn()?floorShadow:floorStd; if(grid) grid.visible=!!look.grid; floorStd.color.set((look.bg==='sky'||look.bg==='realsky')?new THREE.Color('#b3ada8'):bgc.clone().offsetHSL(0,0,-0.02)); scene.background=(look.bg==='sky'||look.bg==='realsky')?skyTex():bgc; }
   scene.fog=look.fog?new THREE.Fog((look.bg==='sky'||look.bg==='realsky')?new THREE.Color('#cfe6f3'):bgc,40,150):null;
   if(look.night){ scene.background=new THREE.Color(0x0a0c18); floorStd.color.set(0x16151c); scene.fog=new THREE.Fog(0x0a0c18,60,170); if(grid) grid.visible=false; }
   if(planMode&&grid) grid.visible=true;
@@ -3545,12 +3554,17 @@ function defaultTexFor(def){ if(def.type==='ledwall'||def.type==='tvstand'||def.
   if(def.type==='buffetcounter') return boardTex('Chaat Corner','#c2185b','#ffffff'); if(def.type==='trussgate') return boardTex('Welcome','#8e1b3a','#f2b544'); return defaultPrint(); }
 function measureLocal(g){ const p=g.position.clone(), r=g.rotation.clone(), s=g.scale.clone(); g.position.set(0,0,0); g.rotation.set(0,0,0); g.scale.set(1,1,1); g.updateMatrixWorld(true);
   const b=new THREE.Box3(); g.children.forEach(ch=>{ if(ch.name!=='beam') b.expandByObject(ch); }); const v=new THREE.Vector3(); b.getSize(v); g.position.copy(p); g.rotation.copy(r); g.scale.copy(s); g.updateMatrixWorld(true); return {w:+v.x.toFixed(3),d:+v.z.toFixed(3),h:+v.y.toFixed(3)}; }
+const suEdgeMat=new THREE.LineBasicMaterial({color:SU.edge,transparent:true,opacity:.9});
+function addSuEdges(g){ let budget=60000; const list=[]; g.traverse(m=>{ if(!m.isMesh||m.isInstancedMesh||!m.geometry||m.name==='beam') return; const r=m.material&&(Array.isArray(m.material)?m.material[0]:m.material);
+    if(r&&((r.emissive&&r.emissive.getHex()!==0)||(r.transparent&&r.opacity<.6))) return; const gp=m.geometry, n=gp.index?gp.index.count/3:gp.attributes.position.count/3; if(n>3000) return; list.push(m); });
+  list.forEach(m=>{ if(budget<=0) return; try{ const eg=new THREE.EdgesGeometry(m.geometry,30); const cnt=eg.attributes.position.count/2; if(!cnt){ eg.dispose(); return; } budget-=cnt; const e=new THREE.LineSegments(eg,suEdgeMat); e.name='edges'; e.raycast=()=>{}; m.add(e); }catch(err){} }); }
 function buildParam(g){
   const def=catDef(g.userData.type); if(!def) return;
   while(g.children.length){ const c=g.children[0]; g.remove(c); c.traverse&&c.traverse(m=>{ if(m.geometry) m.geometry.dispose(); }); }
   if(def.flex&&!g.userData.tex) g.userData.tex=defaultTexFor(def);
   def.build(g,g.userData.params,PB(g),g.userData.tex);
   if(g.userData.type!=='lay-seating'&&g.userData.type!=='str-wall') autoMerge(g);
+  if(g.userData.type!=='lay-seating') addSuEdges(g);
   shadowAll(g); g.traverse(m=>{ if(m.name==='beam'){ m.castShadow=false; m.receiveShadow=false; } });
   g.userData.size=measureLocal(g);
   const ps=g.userData.paint&&specById(g.userData.paint); if(ps){ const keep=g.userData.paint; paintObj(g,ps); g.userData.paint=keep; }
@@ -3683,7 +3697,7 @@ function openSkpHelp(){ toast('A .skp file can only be opened by SketchUp. In Sk
 
 $('#daeFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importSketchUp(f).catch(err=>bad('Could not open that file: '+err.message)); e.target.value=''; });
 /* ===================== Round 4: settings, quotation, stock, PDF, favourites ===================== */
-const APP_VER='v1.9';
+const APP_VER='v1.10';
 const SET={rates:{},stock:{},favs:[],recent:[],lib:null,_u:0};
 async function settingsLoad(){
   let v=await idbReq('readonly',st=>st.get('settings'));
@@ -3882,7 +3896,7 @@ async function applyNight(){ const on=!!look.night;
   if(on){ scene.background=new THREE.Color(0x0a0c18); floorStd.color.set(0x16151c); scene.fog=new THREE.Fog(0x0a0c18,60,170); sun.intensity=0.08; sun.color.set(0x8aa0ff); if(grid) grid.visible=false; }
   else { setBackground(); applySun(); }
   applyEnv(); placeNightLights(); }
-function renderFrame(){ const night=!!(look.night&&!fastMode), ol=outlineOn(); if(composer&&(night||ol)){ bloomPass.enabled=night; if(outlinePass){ outlinePass.enabled=ol; if(ol) outlinePass.selectedObjects=multi.length?multi.slice():[selected]; } composer.render(); } else renderer.render(scene,camera); }
+function renderFrame(){ { const w=suDomeOn(); if(suDome.visible!==w){ suDome.visible=w; if(!(typeof venueTex!=='undefined'&&venueTex&&design.venueBg)) floor.material=w?floorShadow:floorStd; } } const night=!!(look.night&&!fastMode), ol=outlineOn(); if(composer&&(night||ol)){ bloomPass.enabled=night; if(outlinePass){ outlinePass.enabled=ol; if(ol) outlinePass.selectedObjects=multi.length?multi.slice():[selected]; } composer.render(); } else renderer.render(scene,camera); }
 
 /* ---- extra textures (drawn in the app) ---- */
 function petal(x,cx,cy,r,a,col){ x.save(); x.translate(cx,cy); x.rotate(a); x.beginPath(); x.ellipse(0,-r*.5,r*.32,r*.55,0,0,PI*2); x.fillStyle=col; x.fill(); x.restore(); }
@@ -4249,7 +4263,7 @@ function buildWall(g,p){
   const pos=geo.attributes.position; for(let i=0;i<pos.count;i++){ const x=pos.getX(i), z=pos.getZ(i); if(Math.abs(x-x0)<1e-4) pos.setX(i,x0+(p.ea||0)*z/s); else if(Math.abs(x-x1)<1e-4) pos.setX(i,x1+(p.eb||0)*z/s); }
   geo.computeVertexNormals();
   const body=new THREE.Mesh(geo,mat(p.col!=null?p.col:0xf3e9e2,{roughness:.92,side:THREE.DoubleSide})); body.name='body'; g.add(body);
-  const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo,25),new THREE.LineBasicMaterial({color:0x3b2f3a,transparent:true,opacity:.45})); e.name='edges'; g.add(e);
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo,25),new THREE.LineBasicMaterial({color:SU.edge,transparent:true,opacity:.9})); e.name='edges'; g.add(e);
   const wood=mat(0x6b4423,{roughness:.6}), white=mat(0xf4f1ec,{roughness:.5}), glass=new THREE.MeshStandardMaterial({color:0xbfe3ff,transparent:true,opacity:.28,roughness:.05,metalness:.1,side:THREE.DoubleSide});
   const add=(geom,m,x,y,z)=>{ const k=new THREE.Mesh(geom,m); k.position.set(x||0,y||0,z||0); k.name='trim'; g.add(k); return k; };
   ops.forEach(b=>{ if(b.k==='arch') return; const fw=.25, fd=t+.12, top=Math.min(fw,H-b.y1), door=b.y0<=0.001, m=door?wood:white;
