@@ -548,7 +548,7 @@ body.focus #focusExit{display:grid}
 <div id="app">
   <div id="titlebar">
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
-    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.11</span><span id="status">Opening…</span></div>
+    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.12</span><span id="status">Opening…</span></div>
     <button class="ibtn" id="designsBtn" aria-label="Home: my designs" title="Home: my designs"><svg class="i"><use href="#i-folder"/></svg></button>
     <button class="ibtn" id="searchBtn" aria-label="Search tools" title="Search tools (Shift+S)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="ibtn" id="undo" aria-label="Undo" title="Undo (Cmd+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
@@ -2309,6 +2309,7 @@ async function boot(){
   else { loading=true; buildStarter(); loading=false; refreshVis(); applyAll(); $('#dTitle').textContent=design.name; await saveNow(false); }
   setStatus(idb?'Saved on this phone':'Not saving: storage blocked');
   initCloud();
+  try{ await Promise.race([seedDesigns(),new Promise(r=>setTimeout(r,4000))]); }catch(e){}
   try{ if(!new URLSearchParams(location.search).get('open')) openHome(); }catch(e){}
   try{ const o=new URLSearchParams(location.search).get('open'); if(o==='designs') setTimeout(openDesigns,400); if(o==='quote') setTimeout(openQuote,400); }catch(e){}
 }
@@ -3358,7 +3359,7 @@ defineSet({base:'chr',cat:'Chairs',tag:'Furniture',
     const per=Math.min(p.per,n), rows=Math.ceil(n/per); let k=0; for(let r=0;r<rows;r++){ const cnt=Math.min(per,n-k); const curve=p.layout==='theatre'; for(let i=0;i<cnt;i++,k++){ const x=(i-(cnt-1)/2)*(1.6+p.gap); const z=r*(2.6+p.gap); const ry=curve?-x/(30+r*3):0; place(x,z+(curve?x*x/(60+r*6):0),ry); } if(p.layout==='rows'&&per>6&&r%1===0){} } } },
  [['Chiavari chair – gold',{}],['Chiavari chair – silver',{finish:'silver',fabric:'white'}],['Chiavari chair – white',{finish:'white',fabric:'ivory'}],['Chiavari chair – rose gold',{finish:'rosegold',fabric:'peach'}],['Ghost chair (clear)',{style:'ghost'}],['Tiffany chair – gold',{style:'tiffany',finish:'gold'}],['Tiffany chair – white',{style:'tiffany',finish:'white'}],
   ['Crossback wooden chair',{style:'crossback'}],['Napoleon chair',{style:'napoleon',finish:'champagne',fabric:'white'}],['Maharaja chair (single)',{style:'maharaja',finish:'gold',fabric:'red'}],['Royal throne chair',{style:'throne',finish:'gold',fabric:'maroon'}],['Banquet chair – white cover',{style:'banquet',fabric:'white'}],
-  ['Banquet chair with gold sash',{style:'sash',fabric:'gold'}],['Banquet chair with red sash',{style:'sash',fabric:'red'}],['Banquet chair with pink sash',{style:'sash',fabric:'pink'}],['Wingback chair',{style:'wingback',fabric:'champagne'}],['Accent tub chair',{style:'accent',fabric:'peach',finish:'gold'}],
+  ['Banquet chair with gold sash',{style:'sash',fabric:'gold'}],['Banquet chair with red sash',{style:'sash',fabric:'red'}],['Banquet chair with pink sash',{style:'sash',fabric:'pink'}],['Banquet chair with green sash',{style:'sash',fabric:'green'}],['Wingback chair',{style:'wingback',fabric:'champagne'}],['Accent tub chair',{style:'accent',fabric:'peach',finish:'gold'}],
   ['Cane chair',{style:'cane',fabric:'cream'}],['Peacock rattan chair',{style:'peacock',fabric:'white'}],['Carved wooden chair (Andhra)',{style:'carved',fabric:'maroon'}],['Velvet dining chair',{style:'velvet',fabric:'green',finish:'gold'}],['Folding chair',{style:'folding',finish:'black'}],
   ['Bar stool',{style:'barstool',finish:'silver',fabric:'black'}],['Kids chair',{style:'kids',finish:'white',fabric:'pink'}],['Ladder-back chair',{style:'ladder'}],['Louis chair',{style:'louis',finish:'gold',fabric:'ivory'}],
   ['Row of 10 chiavari',{n:10,layout:'row',gap:.5}],['Guest seating 50 (5 rows)',{style:'banquet',fabric:'white',n:50,layout:'rows',per:10,gap:.5}],['Guest seating 100 (theatre)',{style:'sash',fabric:'gold',n:100,layout:'theatre',per:14,gap:.4}],['Round of 8 tiffany',{style:'tiffany',n:8,layout:'round',gap:.4}],
@@ -3750,7 +3751,7 @@ function openSkpHelp(){ toast('A .skp file can only be opened by SketchUp. In Sk
 
 $('#daeFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importSketchUp(f).catch(err=>bad('Could not open that file: '+err.message)); e.target.value=''; });
 /* ===================== Round 4: settings, quotation, stock, PDF, favourites ===================== */
-const APP_VER='v1.11';
+const APP_VER='v1.12';
 const SET={rates:{},stock:{},favs:[],recent:[],lib:null,_u:0};
 async function settingsLoad(){
   let v=await idbReq('readonly',st=>st.get('settings'));
@@ -4462,6 +4463,7 @@ addM('fl-kota','Kota stone','Floor',{draw:'kota',color:0x7f8f84,tile:8,rough:.5}
 addM('fl-terrazzo','Terrazzo','Floor',{draw:'terrazzo',color:0xe9e2d8,tile:5,rough:.35});
 addM('fl-herring','Herringbone wood','Floor',{draw:'herring',color:0xa0703f,tile:5,rough:.5});
 addM('fl-bqcarpet','Banquet carpet','Floor',{draw:'bqcarpet',color:0x6e1023,tile:6,rough:1});
+addM('fl-greencarpet','Green banquet carpet','Floor',{draw:'bqcarpet',color:0x1f3d2c,tile:6,rough:1});
 addM('fl-bluecarpet','Blue carpet','Floor',{draw:'carpet',color:0x24407a,tile:2,rough:1});
 addM('fl-mosaic','Mosaic tiles','Floor',{draw:'mosaic',color:0x3f7f9a,tile:3,rough:.3});
 let finishTarget=null;
@@ -5207,6 +5209,10 @@ function designThumb(){ try{ if(planMode||$('#vp').classList.contains('on')||!$(
     const sw=src.width, sh=src.height, r=Math.max(W/sw,H/sh), w=W/r, h=H/r; c.getContext('2d').drawImage(src,(sw-w)/2,(sh-h)/2,w,h,0,0,W,H);
     thumbCache={id:design.id,url:c.toDataURL('image/jpeg',.62),t:Date.now()}; design.thumb=thumbCache.url; return thumbCache.url; }catch(e){ return design.thumb||null; } }
 
+/* ready designs shipped with the app: added once to My designs on every device (phone, PC app, Mac, Android) */
+const SEED_DESIGNS=[{id:'d-hall-60x100',file:'designs/function-hall-60x100.json'}];
+async function seedDesigns(){ for(const sd of SEED_DESIGNS){ const flag='decor3d.seed.'+sd.id; try{ if(localStorage.getItem(flag)) continue; }catch(e){ continue; }
+  try{ if(await getDesign(sd.id)){ localStorage.setItem(flag,'1'); continue; } const r=await fetch(sd.file,{cache:'no-cache'}); if(!r.ok) continue; const d=await r.json(); d.id=sd.id; d.updated=Date.now(); await putDesign(d); try{ queueCloud(d); }catch(e){} localStorage.setItem(flag,'1'); }catch(e){} } }
 /* ---- Home screen ---- */
 let homeQ='', dmId=null;
 async function openHome(){ try{ const cur=await getDesign(design.id); if(items.length&&(dirty||!cur||!cur.thumb)) await saveNow(true); }catch(e){}
