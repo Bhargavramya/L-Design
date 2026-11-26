@@ -548,7 +548,7 @@ body.focus #focusExit{display:grid}
 <div id="app">
   <div id="titlebar">
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
-    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.13</span><span id="status">Opening…</span></div>
+    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.14</span><span id="status">Opening…</span></div>
     <button class="ibtn" id="designsBtn" aria-label="Home: my designs" title="Home: my designs"><svg class="i"><use href="#i-folder"/></svg></button>
     <button class="ibtn" id="searchBtn" aria-label="Search tools" title="Search tools (Shift+S)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="ibtn" id="undo" aria-label="Undo" title="Undo (Cmd+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
@@ -2674,7 +2674,7 @@ const FIN_OPTS=Object.keys(FIN);
 const FAB_OPTS=['white','ivory','cream','champagne','gold','red','maroon','pink','peach','yellow','orange','green','mint','blue','teal','purple','lavender','black','grey','silver','wood','teak','marble'];
 const PAL={pink:[0xf48fb1,0xf8bbd0,0xec407a],marigold:[0xf39c12,0xffc61a,0xe67e22],rose:[0xe8436b,0xf7a1b8,0xd81b60],white:[0xffffff,0xf3efe6,0xfaf7ee],orchid:[0x9b59b6,0xd7a6ef,0x8e44ad],
  mixed:[0xe8436b,0xf39c12,0xffffff,0xf7a1b8,0xffc61a],peach:[0xf6b38a,0xfde2cf,0xf4a582],red:[0xc0182b,0xe8436b,0x9b1028],jasmine:[0xfffdf4,0xf6f0dc,0xeef5e0],
- blue:[0x3d6fd1,0xa9c4f5,0xffffff],pastel:[0xf7c6d9,0xd8c7f0,0xfde2cf,0xffffff],green:[0x2f7d3a,0x5aa15f,0x86c06c],yellow:[0xffc61a,0xfff1a8,0xf5b800],purple:[0x6a2c91,0x9b59b6,0xd7a6ef]};
+ blue:[0x3d6fd1,0xa9c4f5,0xffffff],pastel:[0xf7c6d9,0xd8c7f0,0xfde2cf,0xffffff],green:[0x2f7d3a,0x5aa15f,0x86c06c],yellow:[0xffc61a,0xfff1a8,0xf5b800],purple:[0x6a2c91,0x9b59b6,0xd7a6ef],whiteblue:[0xffffff,0xf3efe6,0xb9cdea,0x9aa6dc,0xeef0e6,0xcfe39a]};
 const PAL_OPTS=Object.keys(PAL);
 const LIGHT={warm:0xffc98a,amber:0xffa53a,white:0xffffff,pink:0xff5fa8,purple:0xa45bff,blue:0x3f8cff,red:0xff3b3b,green:0x3dff7a,gold:0xffd24a,rainbow:0xff8a00};
 const LIGHT_OPTS=Object.keys(LIGHT);
@@ -3401,6 +3401,50 @@ defineSet({base:'sfa',cat:'Sofas',tag:'Furniture',
 
 /* ---------- Flowers ---------- */
 const FL_KIND=['aisletrack','stagetrack','toran','ball','hangingball','strings','centrelow','centretall','bouquetstand','chandelier','ring','cascade','panel','pookalam','petalheart','floorcluster','garland','urli','basket','tree','arch','pillarwrap','ceiling','doorframe','swag'];
+/* ---------- Floral tower & LED ring stage set (from client reference video) ----------
+   origin = centre of the back line on the stage floor; everything sits on the stage top and faces +z */
+defineSet({base:'set',cat:'Stage',tag:'Stage',
+  params:[PF('w','Set width',32,12,60),PF('d','Set depth',12,6,24),PF('h','Ring height (from this floor)',12.5,8,20),PF('r','Ring width',13.5,6,20),PF('t','Tower width at base',6.5,3,12),
+    CH('pal','Flower colour','whiteblue',PAL_OPTS),CH('ring','Ring light','white',LIGHT_OPTS),CH('spiral','Pearl spiral','on',['on','off']),CH('pillars','Greenery pillars','4',['4','2','none']),
+    CH('candles','Candle stands','on',['on','off']),CH('sofa','Couple sofa','on',['on','off']),CH('back','Backdrop','charcoal',['charcoal','white','none'])],
+  build(g,p){ const q=Q(g), W=p.w/2, D=p.d, H=p.h, R=p.r/2, tz=Math.min(D*.45,R+.5), cols=PAL[p.pal]||PAL.whiteblue, leaf=[0x2f7d3a,0x4f9a4f];
+    const ph=i=>{ const v=Math.sin(i*12.9898+78.233)*43758.5453; return v-Math.floor(v); };
+    if(p.back!=='none'){ q.box(p.w+4,H+1.5,.3,p.back==='white'?'white':[0x2e3236,{roughness:.95}],0,0,-.4); q.box(p.w+4,.8,.6,'silver',0,H+1.1,-.3); }
+    // LED ring with metal rim, hung from above
+    q.tor(R,.45,[LIGHT[p.ring]||0xffffff,{emissive:LIGHT[p.ring]||0xffffff,emissiveIntensity:1.6,roughness:.4}],0,H,tz,PI*2,PI/2);
+    const rim=q.cyl(R+.75,R+.75,1.2,'silver',0,H-.2,tz,64); rim.material=rim.material.clone(); rim.material.side=THREE.DoubleSide; rim.geometry=new THREE.CylinderGeometry(R+.75,R+.75,1.2,64,1,true); rim.position.y=H+.4;
+    [0,2.1,4.2].forEach(a=>q.bar([Math.cos(a)*(R+.6),H+1,tz+Math.sin(a)*(R+.6)],[Math.cos(a)*(R+.6),H+4,tz+Math.sin(a)*(R+.6)],.03,'grey'));
+    // floral tower: hourglass from floor up into the ring
+    q.cyl(.12,.12,H,'grey',0,0,tz,8);
+    const fo=[], lo=[]; const n=Math.round(H*95*(p.t/6.5));
+    for(let i=0;i<n;i++){ const t=ph(i*7+1), y=t*H, w=(p.t/2)*(1-.62*Math.sin(Math.min(1,t*1.08)*PI*.95))*(t>.86?1.3:1), rr=w*Math.sqrt(ph(i*3+2)), a=i*2.39996;
+      const pt=[Math.cos(a)*rr,y,tz+Math.sin(a)*rr,i]; if(i%9===0) lo.push([pt[0],pt[1],pt[2],i%2,1.1]); else fo.push(pt); }
+    q.beads(fo,.27,cols); q.beads(lo,.22,leaf,false,'leaf');
+    const sp=[]; for(let k=0;k<26;k++){ const a=k*2.39996, rd=p.t*.28+ph(k)*p.t*.2, yb=ph(k*5)*H*.75; for(let j=0;j<7;j++) sp.push([Math.cos(a)*rd,yb+j*.3,tz+Math.sin(a)*rd,k%2]); }
+    q.beads(sp,.15,[0x9aa6dc,0xb9cdea]);
+    // white pearl spiral
+    if(p.spiral==='on'){ const pts=[]; for(let i=0;i<=160;i++){ const t=i/160, a=t*PI*5, rr=p.t*.55+.4*Math.sin(t*6); pts.push([Math.cos(a)*rr,.8+t*(H-1.2),tz+Math.sin(a)*rr]); }
+      q.tube(pts,.06,'white'); const pr=[], pb=[]; pts.forEach((v,i)=>{ if(i%4===0) (i%20===0?pb:pr).push([v[0],v[1],v[2],0]); }); q.beads(pr,.13,[[0xffffff,{roughness:.15}]]); q.beads(pb,.3,[[0xffffff,{roughness:.15}]]); }
+    // flower mounds across the back and round the tower
+    const mo=[]; for(let i=0;i<Math.round(p.w*55);i++){ const x=(ph(i*11)*2-1)*(W-.5), z=.4+ph(i*13)*Math.min(D*.75,tz+3.5), dx=Math.abs(x);
+      if(dx<3.6&&z>tz+2) continue; const hm=dx<p.t*.7?2.2:dx<W*.55?1.6-dx*.04:1.1; mo.push([x,ph(i*17)*hm,z,i]); }
+    q.beads(mo,.28,cols); q.beads(mo.filter((_,i)=>i%5===0).map((v,i)=>[v[0]+.2,v[1]*.6,v[2]+.2,i%2,1.2]),.24,leaf,false,'leaf');
+    // hanging greenery drums with crystal strands & chandelier
+    const pil=p.pillars==='4'?[-.94,-.66,.66,.94]:p.pillars==='2'?[-.8,.8]:[];
+    pil.forEach(f=>{ const x=f*W, z=1.6; q.cyl(1.6,1.6,.7,'silver',x,H+.2,z,32); const gl=[]; for(let i=0;i<80;i++){ const a=i*2.39996, rr=1.2+ph(i)*.45; gl.push([x+Math.cos(a)*rr,H-ph(i*3)*1.8,z+Math.sin(a)*rr,i%2,1.6]); } q.beads(gl,.25,leaf,false,'leaf');
+      q.glow(.5,LIGHT.warm,x,H-3.2,z); const cr=[]; for(let k=0;k<24;k++){ const a=k/24*PI*2; for(let s=0;s<Math.round((H-1)/ .35);s++) cr.push([x+Math.cos(a)*1.45,H-.2-s*.35,z+Math.sin(a)*1.45]); } q.beads(cr,.045,[[0xeaf6ff,{metalness:.4,roughness:0,transparent:true,opacity:.75}]]); });
+    // gold candle stands with warm flames
+    if(p.candles==='on') for(let i=0;i<28;i++){ const sx=i%2?1:-1, x=sx*(4.5+ph(i*5)*(W-5)), z=.5+ph(i*7)*2, hc=1.5+ph(i*3)*3.5; q.cyl(.04,.05,hc,'gold',x,0,z,6); q.glow(.09,LIGHT.amber,x,hc+.1,z); }
+    // couple sofa (beige bench, wooden legs)
+    if(p.sofa==='on'){ const sz=Math.min(D-1.5,tz+4.5); q.box(6.2,.25,2.2,'teak',0,.55,sz); q.box(6.2,.9,2.2,'cream',0,.8,sz); [[-2.9,-.9],[2.9,-.9],[-2.9,.9],[2.9,.9]].forEach(([x,z])=>q.cyl(.07,.05,.55,'teak',x,0,sz+z,8)); }
+    // warm & cool uplights
+    [-6,-2,2,6].forEach((x,i)=>{ q.cyl(.25,.25,.35,'black',x*Math.min(1,W/14),0,tz+R*.4,10); q.beam(.25,1.8,H*.7,i%2?0xd9ffd0:0xcfe0ff,x*Math.min(1,W/14),.35,tz+R*.4,PI); });
+  }},[
+  ['Floral tower & LED ring set',{}],
+  ['Floral tower set — pink & white',{pal:'pastel',ring:'pink'}],
+  ['Floral tower set — white & gold',{pal:'jasmine',ring:'warm',back:'white'}],
+  ['Floral tower set — 2 pillars (small hall)',{w:22,r:10,t:5,h:11,pillars:'2'}],
+]);
 defineSet({base:'flw',cat:'Flowers',tag:'Flowers',
   params:[CH('kind','Type','aisletrack',FL_KIND),PF('w','Width / length',20,1,120),PF('h','Height',3,.5,20),CH('pal','Flower colour','rose',PAL_OPTS),CH('green','Greenery','some',['none','some','lots']),CH('finish','Stand / base','gold',FIN_OPTS)],
   build(g,p){ const q=Q(g), k=p.kind, w=p.w, h=p.h, cols=PAL[p.pal]||PAL.rose, W=w/2;
@@ -3767,7 +3811,7 @@ function openSkpHelp(){ toast('A .skp file can only be opened by SketchUp. In Sk
 
 $('#daeFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importSketchUp(f).catch(err=>bad('Could not open that file: '+err.message)); e.target.value=''; });
 /* ===================== Round 4: settings, quotation, stock, PDF, favourites ===================== */
-const APP_VER='v1.13';
+const APP_VER='v1.14';
 const SET={rates:{},stock:{},favs:[],recent:[],lib:null,_u:0};
 async function settingsLoad(){
   let v=await idbReq('readonly',st=>st.get('settings'));
