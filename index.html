@@ -548,7 +548,7 @@ body.focus #focusExit{display:grid}
 <div id="app">
   <div id="titlebar">
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
-    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.15</span><span id="status">Opening…</span></div>
+    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.16</span><span id="status">Opening…</span></div>
     <button class="ibtn" id="designsBtn" aria-label="Home: my designs" title="Home: my designs"><svg class="i"><use href="#i-folder"/></svg></button>
     <button class="ibtn" id="searchBtn" aria-label="Search tools" title="Search tools (Shift+S)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="ibtn" id="undo" aria-label="Undo" title="Undo (Cmd+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
@@ -2014,14 +2014,18 @@ function renderSearch(){ const q=$('#searchIn').value.trim(), list=$('#searchLis
   const T=q?smartFilter(tools,q,t=>[t.label+' '+t.id,t.g]):tools.slice(0,12);
   const D=q?smartFilter(CATALOG.filter(listed),q,catText):[];
   const L=q?smartFilter(SET.lib||[],q,l=>l.name):[];
+  const MD=q?smartFilter(modelIndex(),q,m=>[m.name,m.cat||'My items','3d model sketchup']):[];
+  const wantImp=q&&/import|sketch|\.?dae|skp|3d model|glb|upload/i.test(q);
   const Ms=q?smartFilter(M,q,m=>[m.name,m.cat]):[];
   let h='';
+  if(MD.length||wantImp) h+=`<h4>My 3D models</h4><div class="cgrid">`+(wantImp?`<div class="ccard"><button class="cbtn" id="sImp3d"><span class="cico">${ico('cube')}</span><span class="cn">Import 3D model</span><small>SketchUp .dae, .glb</small></button></div>`:'')+MD.map(m=>`<div class="ccard"><button class="cbtn" data-sm3d="${m.id}"><span class="cico">${ico('cube')}</span><span class="cn">${esc(m.name)}</span><small>${esc(m.cat&&m.cat!=='mine'?m.cat:'My items')}</small></button></div>`).join('')+'</div>';
   if(D.length||L.length){ h+=`<h4>Decor items <small style="color:var(--muted);font-weight:500">${D.length+L.length}</small></h4><div class="cgrid">`+L.map(l=>`<div class="ccard"><button class="cbtn" data-slib="${l.id}"><span class="cico">${ico('save')}</span><span class="cn">${esc(l.name)}</span><small>My item</small></button></div>`).join('')
     +D.slice(0,60).map(d=>`<div class="ccard"><button class="cbtn" data-sadd="${d.type}">${thumbHTML(d)}<span class="cn">${esc(d.name)}</span><small>${esc(d.cat)}</small></button></div>`).join('')+'</div>'; }
   if(T.length) h+=`<h4>Tools</h4><div class="grid2">`+T.map(t=>`<button class="row-btn" data-stool="${t.id}">${ico(t.icon)}<span>${esc(t.label)}<small>${esc(t.g)}${keys[t.id]?' · '+keys[t.id]:''}</small></span></button>`).join('')+'</div>';
   if(Ms.length) h+=`<h4>Colours &amp; materials</h4><div class="grid2">`+Ms.slice(0,16).map(m=>`<button class="row-btn" data-smat="${m.id}"><span class="sw" style="${swatchStyle(m)};width:28px;height:28px;border-radius:8px;flex:none"></span><span>${esc(m.name)}<small>${esc(m.cat)} · tap to paint</small></span></button>`).join('')+'</div>';
   list.innerHTML=h||`<div class="empty">Nothing matches "${esc(q)}". Try chair, sofa, mandap, LED, flowers, gold or push.</div>`;
   $$('[data-sadd]').forEach(b=>b.onclick=()=>{ closeSheets(); addCatalogItem(b.dataset.sadd); });
+  $$('[data-sm3d]').forEach(b=>b.onclick=()=>{ closeSheets(); addStoredModel(b.dataset.sm3d); }); const si=$('#sImp3d'); if(si) si.onclick=()=>{ closeSheets(); $('#glbFile').click(); };
   $$('[data-slib]').forEach(b=>b.onclick=()=>{ const l=(SET.lib||[]).find(x=>x.id===b.dataset.slib); closeSheets(); if(l){ const o=deserialize(l.data); const t=controls.target; o.position.x=snap(t.x); o.position.z=snap(t.z); applyLook(); push(addCmd(o)); select(o); markDirty(); toast(l.name+' added'); } });
   $$('[data-stool]').forEach(b=>b.onclick=()=>{ closeSheets(); runTool(b.dataset.stool); });
   $$('[data-smat]').forEach(b=>b.onclick=()=>{ const m=specById(b.dataset.smat); closeSheets(); runTool('paint'); setPaint(m); });
@@ -3689,10 +3693,12 @@ function makeParam(type,params){ const def=catDef(type); const g=new THREE.Group
 /* ---- catalogue sheet ---- */
 let catSel='Mandaps';
 const LEGACY=[['arch','Arch frame (top-curve)','Backdrops'],['flower','Flower stand','Props'],['pillar','Decor pillar','Pillars'],['chair','Couple chair','Furniture'],['lights','Fairy lights string','Lighting'],['person','Scale person 5\' 6"','Stage'],['carpet','Red carpet 4\' × 12\'','Carpets']];
+/* catalogue items added in recent updates — shown in Components → Recently added */
+const NEW_TYPES=['set-floral-tower-led-ring-set','set-floral-tower-set-pink-white','set-floral-tower-set-white-gold','set-floral-tower-set-2-pillars-small-hall'];
 function renderCatalog(){
   if(!$('#dragTip')&&$('#catGrid')) $('#catGrid').insertAdjacentHTML('beforebegin','<p class="dragtip" id="dragTip">Tap a picture to add it, or press and drag it onto the hall to place it exactly.</p>');
   const q=($('#catSearch')&&$('#catSearch').value||'').trim().toLowerCase();
-  const special=[['fav','Favourites',SET.favs.length],['recent','Recent',SET.recent.length],['mine','My items',(SET.lib||[]).length+modelIndex().filter(m=>!m.cat||m.cat==='mine').length]];
+  const special=[['new','Recently added',NEW_TYPES.filter(catDef).length+Math.min(12,modelIndex().length)],['fav','Favourites',SET.favs.length],['recent','Recent',SET.recent.length],['mine','My items',(SET.lib||[]).length+modelIndex().filter(m=>!m.cat||m.cat==='mine').length]];
   $('#catCats').innerHTML=special.map(([k,l,n])=>`<button class="chip" data-cc="${k}" aria-pressed="${!q&&k===catSel}">${k==='fav'?ico('star'):''}${l} <small style="opacity:.6">${n}</small></button>`).join('')
     +CAT_ORDER.map(c=>`<button class="chip" data-cc="${c}" aria-pressed="${!q&&c===catSel}">${c} <small style="opacity:.6">${CATALOG.filter(d=>d.cat===c&&!d.dup).length+LEGACY.filter(l=>l[2]===c).length+modelIndex().filter(m=>m.cat===c).length}</small></button>`).join('');
   $$('#catCats [data-cc]').forEach(b=>b.onclick=()=>{ catSel=b.dataset.cc; $('#catSearch').value=''; renderCatalog(); buzz(6); });
@@ -3702,8 +3708,9 @@ function renderCatalog(){
   if(q) items1=smartFilter(CATALOG.filter(listed),q,catText);
   else if(catSel==='fav') items1=SET.favs.map(catDef).filter(Boolean);
   else if(catSel==='recent') items1=SET.recent.map(catDef).filter(Boolean);
+  else if(catSel==='new') items1=NEW_TYPES.map(catDef).filter(Boolean);
   else items1=CATALOG.filter(d=>d.cat===catSel&&!d.dup);
-  const items2=(catSel==='fav'||catSel==='recent')&&!q?[]:(q?smartFilter(LEGACY,q,l=>[l[1],l[2]]):LEGACY.filter(l=>l[2]===catSel));
+  const items2=(catSel==='fav'||catSel==='recent'||catSel==='new')&&!q?[]:(q?smartFilter(LEGACY,q,l=>[l[1],l[2]]):LEGACY.filter(l=>l[2]===catSel));
   const emptyMsg=catSel==='fav'&&!q?'No favourites yet. Tap the star next to any item to keep it here.':catSel==='recent'&&!q?'Items you add will show here.':'No item matches that. Try "mandap", "LED", "truss" or "chair".';
   $('#catGrid').innerHTML=items1.map(d=>`<div class="ccard"><button class="cbtn" data-cat-add="${d.type}" aria-label="Add ${esc(d.name)}">${thumbHTML(d)}<span class="cn">${esc(d.name)}</span><small>${esc(sizeTxt(d))}</small></button><button class="ibtn star${isFav(d.type)?' on':''}" data-fav="${d.type}" aria-label="${isFav(d.type)?'Remove from':'Add to'} favourites: ${esc(d.name)}" aria-pressed="${isFav(d.type)}">${ico('star')}</button></div>`).join('')
     +items2.map(l=>`<div class="ccard"><button class="cbtn" data-add="${l[0]}"><span class="cico">${ico(CAT_ICON[l[2]]||'plus')}</span><span class="cn">${esc(l[1])}</span><small>ready-made</small></button></div>`).join('')
@@ -3711,7 +3718,8 @@ function renderCatalog(){
   $$('[data-cat-add]').forEach(b=>b.onclick=()=>addCatalogItem(b.dataset.catAdd));
   $$('[data-fav]').forEach(b=>b.onclick=()=>{ const t=b.dataset.fav; toggleFav(t); const on=isFav(t); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); const d=catDef(t);
     toast(on?`${d.name} added to Favourites`:`${d.name} removed from Favourites`); if(catSel==='fav') renderCatalog(); else { const c=$('#catCats [data-cc="fav"] small'); if(c) c.textContent=SET.favs.length; } });
-  if(!q&&catSel!=='fav'&&catSel!=='recent'&&catSel!=='mine'&&modelIndex().some(m=>m.cat===catSel)){ $('#catGrid').insertAdjacentHTML('afterbegin',modelCardsHTML(catSel)); bindModelCards(); }
+  if(!q&&catSel==='new'&&modelIndex().length){ $('#catGrid').insertAdjacentHTML('afterbegin',modelCardsHTML('new')); bindModelCards(); }
+  if(!q&&catSel!=='fav'&&catSel!=='recent'&&catSel!=='mine'&&catSel!=='new'&&modelIndex().some(m=>m.cat===catSel)){ $('#catGrid').insertAdjacentHTML('afterbegin',modelCardsHTML(catSel)); bindModelCards(); }
   bindLegacyAdd();
   if(typeof queueThumbs==='function') queueThumbs();
 }
@@ -3813,7 +3821,7 @@ function openSkpHelp(){ toast('A .skp file can only be opened by SketchUp. In Sk
 
 $('#daeFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importSketchUp(f).catch(err=>bad('Could not open that file: '+err.message)); e.target.value=''; });
 /* ===================== Round 4: settings, quotation, stock, PDF, favourites ===================== */
-const APP_VER='v1.15';
+const APP_VER='v1.16';
 const SET={rates:{},stock:{},favs:[],recent:[],lib:null,_u:0};
 async function settingsLoad(){
   let v=await idbReq('readonly',st=>st.get('settings'));
@@ -4093,6 +4101,16 @@ function renderThumb(type){ const def=catDef(type); if(!def) return null; thumbS
   thCam.position.copy(c).add(D.multiplyScalar(r/Math.sin(35*PI/360)*1.02)); thCam.near=r*.05; thCam.far=r*20; thCam.updateProjectionMatrix(); thCam.lookAt(c); thR.render(thScene,thCam);
   let url; try{ url=thR.domElement.toDataURL('image/webp',.8); if(!url.startsWith('data:image/webp')) url=thR.domElement.toDataURL('image/png'); }catch(e){ url=null; }
   thScene.remove(g); g.traverse(m=>{ if(m.geometry) m.geometry.dispose(); if(m.material&&m.material.map&&m.material.map.isCanvasTexture) m.material.map.dispose(); }); return url; }
+function thumbFromGroup(g){ thumbSetup(); g.traverse(m=>{ if(m.name==='beam') m.visible=false; }); const keep={p:g.position.clone(),r:g.rotation.clone(),s:g.scale.clone(),par:g.parent}; g.position.set(0,0,0); g.rotation.set(0,0,0);
+  thScene.add(g); g.updateMatrixWorld(true); const b=new THREE.Box3().setFromObject(g); const c=new THREE.Vector3(), sz=new THREE.Vector3(); b.getCenter(c); b.getSize(sz); const r=Math.max(sz.length()/2,.5); const D=new THREE.Vector3(.55,.45,1.25).normalize();
+  thCam.position.copy(c).add(D.multiplyScalar(r/Math.sin(35*PI/360)*1.02)); thCam.near=r*.05; thCam.far=r*20; thCam.updateProjectionMatrix(); thCam.lookAt(c); thR.render(thScene,thCam);
+  let url=null; try{ url=thR.domElement.toDataURL('image/webp',.8); if(!url.startsWith('data:image/webp')) url=thR.domElement.toDataURL('image/png'); }catch(e){}
+  thScene.remove(g); if(keep.par) keep.par.add(g); g.position.copy(keep.p); g.rotation.copy(keep.r); g.scale.copy(keep.s); return url; }
+async function modelThumb(id){ try{ const rec=await idbReq('readonly',st=>st.get(id)); if(!rec||!rec.src) return null; let g;
+    if(rec.fmt==='dae') g=makeModel(rec.src,rec.name); else { g=makeGltf(rec.src,rec.name); const ok=await g.userData.ready; if(!ok) return null; }
+    const url=thumbFromGroup(g); const ix=modelIndex(), it=ix.find(x=>x.id===id); if(it&&url){ it.thumb=url; saveModelIndex(ix); } return url; }catch(e){ console.warn(e); return null; } }
+let thumbQueue=Promise.resolve();
+function fillModelThumbs(){ modelIndex().filter(m=>!m.thumb).forEach(m=>{ thumbQueue=thumbQueue.then(()=>modelThumb(m.id)).then(url=>{ if(!url) return; $$(`[data-m3dth="${m.id}"]`).forEach(im=>im.src=url); }); }); }
 let thBusyUntil=0;
 addEventListener('pointerdown',()=>{ thBusyUntil=performance.now()+600; },true);
 function queueThumbs(root){ root=root||'#catGrid'; const gen=++thGen;
@@ -4641,15 +4659,15 @@ async function storeModel(name,src,size,fmt){ const id='m3d-'+Date.now().toStrin
 async function addStoredModel(id){ const rec=await idbReq('readonly',st=>st.get(id)); if(!rec||!rec.src) return bad('That model is not on this phone any more.');
   const o=rec.fmt==='dae'?makeModel(rec.src,rec.name):makeGltf(rec.src,rec.name); const t=controls.target; o.position.set(snap(t.x),0,snap(t.z+4)); if(rec.fmt==='dae') applyLook(); push(addCmd(o)); closeSheets(); select(o); runTool('move');
   const ix=modelIndex().find(x=>x.id===id); if(ix&&ix.scale) o.scale.setScalar(ix.scale); toast(rec.name+' added. Drag the arrows to place it.'); buzz([10,40,10]); }
-function modelCardsHTML(cat){ const mine=!cat||cat==='mine'; const ix=modelIndex().filter(m=>mine?(!m.cat||m.cat==='mine'):m.cat===cat); return (mine?`<div class="ccard"><button class="cbtn" id="addGlbBtn"><span class="cico">${ico('cube')}</span><span class="cn">Import 3D model</span><small>SketchUp .dae, .glb or .gltf</small></button></div>`:'')
-  +ix.map(m=>`<div class="ccard"><button class="cbtn" data-m3d="${m.id}"><span class="cico">${ico('cube')}</span><span class="cn">${esc(m.name)}</span><small>${m.size?esc(ftin(m.size.w)+' × '+ftin(m.size.h)+' H'):'3D model'}${m.fmt==='dae'?' · SketchUp':''}</small></button><div style="display:flex;justify-content:center;gap:2px"><button class="ibtn" data-m3dmove="${m.id}" aria-label="Move ${esc(m.name)} to a folder">${ico('folder')}</button><button class="ibtn" data-m3ddel="${m.id}" aria-label="Delete ${esc(m.name)}">${ico('trash')}</button></div></div>`).join(''); }
+function modelCardsHTML(cat){ const mine=!cat||cat==='mine'; const ix=cat==='new'?modelIndex().slice().sort((a,b)=>(b.saved||0)-(a.saved||0)).slice(0,12):modelIndex().filter(m=>mine?(!m.cat||m.cat==='mine'):m.cat===cat); return (mine?`<div class="ccard"><button class="cbtn" id="addGlbBtn"><span class="cico">${ico('cube')}</span><span class="cn">Import 3D model</span><small>SketchUp .dae, .glb or .gltf</small></button></div>`:'')
+  +ix.map(m=>`<div class="ccard"><button class="cbtn" data-m3d="${m.id}"><img class="thumb" alt="" data-m3dth="${m.id}" src="${m.thumb||BLANK}"><span class="cn">${esc(m.name)}</span><small>${m.size?esc(ftin(m.size.w)+' × '+ftin(m.size.h)+' H'):'3D model'}${m.fmt==='dae'?' · SketchUp':''}</small></button><div style="display:flex;justify-content:center;gap:2px"><button class="ibtn" data-m3dmove="${m.id}" aria-label="Move ${esc(m.name)} to a folder">${ico('folder')}</button><button class="ibtn" data-m3ddel="${m.id}" aria-label="Delete ${esc(m.name)}">${ico('trash')}</button></div></div>`).join(''); }
 function openModelMove(id){ const m=modelIndex().find(x=>x.id===id); if(!m) return; let ov=$('#m3dMove'); if(ov) ov.remove();
   const cur=m.cat||'mine'; const opts=[['mine','My items']].concat(CAT_ORDER.map(c=>[c,c]));
   document.body.insertAdjacentHTML('beforeend',`<div id="m3dMove" role="dialog" aria-label="Move to folder" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center"><div style="background:var(--bg,#fff);color:var(--fg,#222);width:100%;max-width:560px;max-height:75vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><b style="font-size:17px">Move ${esc(m.name)} to…</b><button class="ibtn" id="m3dMoveX" aria-label="Close">${ico('x')}</button></div><div style="display:flex;flex-wrap:wrap;gap:8px">${opts.map(([k,l])=>`<button class="chip" data-m3dto="${esc(k)}" aria-pressed="${k===cur}" style="min-height:44px">${esc(l)}</button>`).join('')}</div></div></div>`);
   ov=$('#m3dMove'); const close=()=>ov.remove(); $('#m3dMoveX').onclick=close; ov.onclick=e=>{ if(e.target===ov) close(); };
   $$('[data-m3dto]').forEach(b=>b.onclick=()=>{ const to=b.dataset.m3dto, ix=modelIndex(), it=ix.find(x=>x.id===id); if(!it) return close(); const from=it.cat||'mine'; it.cat=to; saveModelIndex(ix); close(); renderCatalog();
     toast(`${it.name} moved to ${to==='mine'?'My items':to}`,()=>{ const a=modelIndex(), y=a.find(x=>x.id===id); if(y){ y.cat=from; saveModelIndex(a); renderCatalog(); } }); buzz([10,40,10]); }); buzz(6); }
-function bindModelCards(){ const b=$('#addGlbBtn'); if(b) b.onclick=openGlb; $$('[data-m3d]').forEach(x=>x.onclick=()=>addStoredModel(x.dataset.m3d)); $$('[data-m3dmove]').forEach(x=>x.onclick=()=>openModelMove(x.dataset.m3dmove));
+function bindModelCards(){ setTimeout(fillModelThumbs,50); const b=$('#addGlbBtn'); if(b) b.onclick=openGlb; $$('[data-m3d]').forEach(x=>x.onclick=()=>addStoredModel(x.dataset.m3d)); $$('[data-m3dmove]').forEach(x=>x.onclick=()=>openModelMove(x.dataset.m3dmove));
   $$('[data-m3ddel]').forEach(x=>x.onclick=()=>{ const m=modelIndex().find(y=>y.id===x.dataset.m3ddel); if(!m) return;
     openDelete({title:`Delete ${m.name}?`,text:`The 3D model ${m.name} will be removed from My items on this phone. Designs that already use it keep their copy. You can undo for 5 seconds.`,
       onYes:async()=>{ const all=modelIndex(), i=all.findIndex(y=>y.id===m.id); if(i<0) return; const [rm]=all.splice(i,1); saveModelIndex(all); const rec=await idbReq('readonly',st=>st.get(m.id)); await idbReq('readwrite',st=>st.delete(m.id));
