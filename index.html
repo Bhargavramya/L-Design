@@ -548,7 +548,7 @@ body.focus #focusExit{display:grid}
 <div id="app">
   <div id="titlebar">
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
-    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.14</span><span id="status">Opening…</span></div>
+    <div class="brand"><b id="dTitle">Decor 3D</b><span id="ver">Decor 3D v1.15</span><span id="status">Opening…</span></div>
     <button class="ibtn" id="designsBtn" aria-label="Home: my designs" title="Home: my designs"><svg class="i"><use href="#i-folder"/></svg></button>
     <button class="ibtn" id="searchBtn" aria-label="Search tools" title="Search tools (Shift+S)"><svg class="i"><use href="#i-search"/></svg></button>
     <button class="ibtn" id="undo" aria-label="Undo" title="Undo (Cmd+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
@@ -690,7 +690,7 @@ body.focus #focusExit{display:grid}
     <div class="sheet" id="sheetGlb" role="dialog" aria-label="Import 3D model">
       <div class="grab"></div>
       <div class="top"><h3>Import a real 3D model</h3><button class="ibtn" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
-      <p>Add real chairs, chandeliers, flowers and props. Choose a <b>.glb</b> file (also called glTF Binary). It is kept in Components &rarr; My items, ready for every design.</p>
+      <p>Add real chairs, chandeliers, flowers and props. Choose a SketchUp <b>.dae</b> file (in SketchUp: File → Export → 3D Model → COLLADA) or a <b>.glb</b> file (glTF Binary). It is kept in Components &rarr; My items, ready for every design.</p>
       <h4>Free model sites</h4>
       <div class="list">
         <a class="row-btn" style="text-decoration:none" href="https://polyhaven.com/models" target="_blank" rel="noopener"><svg class="i"><use href="#i-cube"/></svg><span>Poly Haven<small>free for any use (CC0), photo-real</small></span></a>
@@ -959,7 +959,7 @@ body.focus #focusExit{display:grid}
   <input type="file" id="restoreFile" accept=".json,application/json" hidden>
   <input type="file" id="propFile" accept="image/*" hidden>
   <input type="file" id="daeFile" accept=".dae,.skp,image/*" multiple hidden>
-  <input type="file" id="glbFile" multiple hidden>
+  <input type="file" id="glbFile" accept=".glb,.gltf,.bin,.dae,.skp,image/*" multiple hidden>
   <input type="file" id="venueFile" accept="image/*">
 </div>
 
@@ -3692,9 +3692,9 @@ const LEGACY=[['arch','Arch frame (top-curve)','Backdrops'],['flower','Flower st
 function renderCatalog(){
   if(!$('#dragTip')&&$('#catGrid')) $('#catGrid').insertAdjacentHTML('beforebegin','<p class="dragtip" id="dragTip">Tap a picture to add it, or press and drag it onto the hall to place it exactly.</p>');
   const q=($('#catSearch')&&$('#catSearch').value||'').trim().toLowerCase();
-  const special=[['fav','Favourites',SET.favs.length],['recent','Recent',SET.recent.length],['mine','My items',(SET.lib||[]).length+modelIndex().length]];
+  const special=[['fav','Favourites',SET.favs.length],['recent','Recent',SET.recent.length],['mine','My items',(SET.lib||[]).length+modelIndex().filter(m=>!m.cat||m.cat==='mine').length]];
   $('#catCats').innerHTML=special.map(([k,l,n])=>`<button class="chip" data-cc="${k}" aria-pressed="${!q&&k===catSel}">${k==='fav'?ico('star'):''}${l} <small style="opacity:.6">${n}</small></button>`).join('')
-    +CAT_ORDER.map(c=>`<button class="chip" data-cc="${c}" aria-pressed="${!q&&c===catSel}">${c} <small style="opacity:.6">${CATALOG.filter(d=>d.cat===c&&!d.dup).length+LEGACY.filter(l=>l[2]===c).length}</small></button>`).join('');
+    +CAT_ORDER.map(c=>`<button class="chip" data-cc="${c}" aria-pressed="${!q&&c===catSel}">${c} <small style="opacity:.6">${CATALOG.filter(d=>d.cat===c&&!d.dup).length+LEGACY.filter(l=>l[2]===c).length+modelIndex().filter(m=>m.cat===c).length}</small></button>`).join('');
   $$('#catCats [data-cc]').forEach(b=>b.onclick=()=>{ catSel=b.dataset.cc; $('#catSearch').value=''; renderCatalog(); buzz(6); });
   if(!q&&catSel==='mine'){ renderLib($('#catGrid')); $('#catGrid').insertAdjacentHTML('afterbegin',`<div class="ccard"><button class="cbtn" id="addPropBtn"><span class="cico">${ico('image')}</span><span class="cn">Add my real prop</span><small>from a photo</small></button></div>`); $('#addPropBtn').onclick=openProp; $('#addPropBtn').closest('.ccard').insertAdjacentHTML('afterend',modelCardsHTML()); bindModelCards(); return; }
   const sizeTxt=def=>{ const p=defaultParams(def); const f=def.params.filter(x=>x.unit==='ft').slice(0,2).map(x=>ftin(p[x.k])).join(' × '); return f||def.params.map(x=>x.label+' '+p[x.k]).slice(0,1).join(''); };
@@ -3711,6 +3711,7 @@ function renderCatalog(){
   $$('[data-cat-add]').forEach(b=>b.onclick=()=>addCatalogItem(b.dataset.catAdd));
   $$('[data-fav]').forEach(b=>b.onclick=()=>{ const t=b.dataset.fav; toggleFav(t); const on=isFav(t); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); const d=catDef(t);
     toast(on?`${d.name} added to Favourites`:`${d.name} removed from Favourites`); if(catSel==='fav') renderCatalog(); else { const c=$('#catCats [data-cc="fav"] small'); if(c) c.textContent=SET.favs.length; } });
+  if(!q&&catSel!=='fav'&&catSel!=='recent'&&catSel!=='mine'&&modelIndex().some(m=>m.cat===catSel)){ $('#catGrid').insertAdjacentHTML('afterbegin',modelCardsHTML(catSel)); bindModelCards(); }
   bindLegacyAdd();
   if(typeof queueThumbs==='function') queueThumbs();
 }
@@ -3806,12 +3807,13 @@ async function importSketchUp(files){
   const o=makeModel(text,dae.name.replace(/\.dae$/i,'')); const t=controls.target; o.position.set(snap(t.x),0,snap(t.z)); applyLook(); push(addCmd(o)); select(o); goView('fit');
   const s=o.userData.size; toast(`${o.userData.name} opened · ${ftin(s.w)} × ${ftin(s.d)} × ${ftin(s.h)}`+(missing?` · ${missing} texture${missing>1?'s':''} missing (pick the texture images together with the .dae)`:''));
   buzz([10,40,10]); markDirty();
+  const sz=worldSize(o).s; storeModel(o.userData.name,text,{w:sz.x,d:sz.z,h:sz.y},'dae').then(()=>{ if(typeof renderCatalog==='function'&&$('#catGrid')) try{ renderCatalog(); }catch(e){} toast(`${o.userData.name} saved in Components → My items`); }).catch(()=>toast('Opened, but could not save to My items (phone storage full?)'));
 }
 function openSkpHelp(){ toast('A .skp file can only be opened by SketchUp. In SketchUp choose File → Export → 3D Model → COLLADA (.dae), then open that file here.'); }
 
 $('#daeFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importSketchUp(f).catch(err=>bad('Could not open that file: '+err.message)); e.target.value=''; });
 /* ===================== Round 4: settings, quotation, stock, PDF, favourites ===================== */
-const APP_VER='v1.14';
+const APP_VER='v1.15';
 const SET={rates:{},stock:{},favs:[],recent:[],lib:null,_u:0};
 async function settingsLoad(){
   let v=await idbReq('readonly',st=>st.get('settings'));
@@ -4634,14 +4636,20 @@ function makeGltf(src,name){ const g=new THREE.Group(); register(g,name||'3D mod
 const MODELS_KEY='decor3d.models';
 function modelIndex(){ try{ return JSON.parse(localStorage.getItem(MODELS_KEY)||'[]'); }catch(e){ return []; } }
 function saveModelIndex(a){ try{ localStorage.setItem(MODELS_KEY,JSON.stringify(a)); }catch(e){} }
-async function storeModel(name,src,size){ const id='m3d-'+Date.now().toString(36); await idbReq('readwrite',st=>st.put({id,name,src,saved:Date.now()}));
-  const ix=modelIndex(); ix.unshift({id,name,saved:Date.now(),size,mb:+(src.length*.75/1048576).toFixed(1)}); saveModelIndex(ix); }
+async function storeModel(name,src,size,fmt){ const id='m3d-'+Date.now().toString(36); await idbReq('readwrite',st=>st.put({id,name,src,fmt:fmt||'gltf',saved:Date.now()}));
+  const ix=modelIndex(); ix.unshift({id,name,saved:Date.now(),size,fmt:fmt||'gltf',mb:+(src.length*(fmt==='dae'?1:.75)/1048576).toFixed(1)}); saveModelIndex(ix); return id; }
 async function addStoredModel(id){ const rec=await idbReq('readonly',st=>st.get(id)); if(!rec||!rec.src) return bad('That model is not on this phone any more.');
-  const o=makeGltf(rec.src,rec.name); const t=controls.target; o.position.set(snap(t.x),0,snap(t.z+4)); push(addCmd(o)); closeSheets(); select(o); runTool('move');
+  const o=rec.fmt==='dae'?makeModel(rec.src,rec.name):makeGltf(rec.src,rec.name); const t=controls.target; o.position.set(snap(t.x),0,snap(t.z+4)); if(rec.fmt==='dae') applyLook(); push(addCmd(o)); closeSheets(); select(o); runTool('move');
   const ix=modelIndex().find(x=>x.id===id); if(ix&&ix.scale) o.scale.setScalar(ix.scale); toast(rec.name+' added. Drag the arrows to place it.'); buzz([10,40,10]); }
-function modelCardsHTML(){ const ix=modelIndex(); return `<div class="ccard"><button class="cbtn" id="addGlbBtn"><span class="cico">${ico('cube')}</span><span class="cn">Import 3D model</span><small>.glb or .gltf file</small></button></div>`
-  +ix.map(m=>`<div class="ccard"><button class="cbtn" data-m3d="${m.id}"><span class="cico">${ico('cube')}</span><span class="cn">${esc(m.name)}</span><small>${m.size?esc(ftin(m.size.w)+' × '+ftin(m.size.h)+' H'):'3D model'}</small></button><button class="ibtn" data-m3ddel="${m.id}" aria-label="Delete ${esc(m.name)}">${ico('trash')}</button></div>`).join(''); }
-function bindModelCards(){ const b=$('#addGlbBtn'); if(b) b.onclick=openGlb; $$('[data-m3d]').forEach(x=>x.onclick=()=>addStoredModel(x.dataset.m3d));
+function modelCardsHTML(cat){ const mine=!cat||cat==='mine'; const ix=modelIndex().filter(m=>mine?(!m.cat||m.cat==='mine'):m.cat===cat); return (mine?`<div class="ccard"><button class="cbtn" id="addGlbBtn"><span class="cico">${ico('cube')}</span><span class="cn">Import 3D model</span><small>SketchUp .dae, .glb or .gltf</small></button></div>`:'')
+  +ix.map(m=>`<div class="ccard"><button class="cbtn" data-m3d="${m.id}"><span class="cico">${ico('cube')}</span><span class="cn">${esc(m.name)}</span><small>${m.size?esc(ftin(m.size.w)+' × '+ftin(m.size.h)+' H'):'3D model'}${m.fmt==='dae'?' · SketchUp':''}</small></button><div style="display:flex;justify-content:center;gap:2px"><button class="ibtn" data-m3dmove="${m.id}" aria-label="Move ${esc(m.name)} to a folder">${ico('folder')}</button><button class="ibtn" data-m3ddel="${m.id}" aria-label="Delete ${esc(m.name)}">${ico('trash')}</button></div></div>`).join(''); }
+function openModelMove(id){ const m=modelIndex().find(x=>x.id===id); if(!m) return; let ov=$('#m3dMove'); if(ov) ov.remove();
+  const cur=m.cat||'mine'; const opts=[['mine','My items']].concat(CAT_ORDER.map(c=>[c,c]));
+  document.body.insertAdjacentHTML('beforeend',`<div id="m3dMove" role="dialog" aria-label="Move to folder" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center"><div style="background:var(--bg,#fff);color:var(--fg,#222);width:100%;max-width:560px;max-height:75vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><b style="font-size:17px">Move ${esc(m.name)} to…</b><button class="ibtn" id="m3dMoveX" aria-label="Close">${ico('x')}</button></div><div style="display:flex;flex-wrap:wrap;gap:8px">${opts.map(([k,l])=>`<button class="chip" data-m3dto="${esc(k)}" aria-pressed="${k===cur}" style="min-height:44px">${esc(l)}</button>`).join('')}</div></div></div>`);
+  ov=$('#m3dMove'); const close=()=>ov.remove(); $('#m3dMoveX').onclick=close; ov.onclick=e=>{ if(e.target===ov) close(); };
+  $$('[data-m3dto]').forEach(b=>b.onclick=()=>{ const to=b.dataset.m3dto, ix=modelIndex(), it=ix.find(x=>x.id===id); if(!it) return close(); const from=it.cat||'mine'; it.cat=to; saveModelIndex(ix); close(); renderCatalog();
+    toast(`${it.name} moved to ${to==='mine'?'My items':to}`,()=>{ const a=modelIndex(), y=a.find(x=>x.id===id); if(y){ y.cat=from; saveModelIndex(a); renderCatalog(); } }); buzz([10,40,10]); }); buzz(6); }
+function bindModelCards(){ const b=$('#addGlbBtn'); if(b) b.onclick=openGlb; $$('[data-m3d]').forEach(x=>x.onclick=()=>addStoredModel(x.dataset.m3d)); $$('[data-m3dmove]').forEach(x=>x.onclick=()=>openModelMove(x.dataset.m3dmove));
   $$('[data-m3ddel]').forEach(x=>x.onclick=()=>{ const m=modelIndex().find(y=>y.id===x.dataset.m3ddel); if(!m) return;
     openDelete({title:`Delete ${m.name}?`,text:`The 3D model ${m.name} will be removed from My items on this phone. Designs that already use it keep their copy. You can undo for 5 seconds.`,
       onYes:async()=>{ const all=modelIndex(), i=all.findIndex(y=>y.id===m.id); if(i<0) return; const [rm]=all.splice(i,1); saveModelIndex(all); const rec=await idbReq('readonly',st=>st.get(m.id)); await idbReq('readwrite',st=>st.delete(m.id));
@@ -4649,7 +4657,7 @@ function bindModelCards(){ const b=$('#addGlbBtn'); if(b) b.onclick=openGlb; $$(
 function openGlb(){ openSheet('sheetGlb'); }
 $('#glbPick').onclick=()=>$('#glbFile').click();
 $('#glbFile').addEventListener('change',e=>{ const f=e.target.files; if(f&&f.length) importGltf(f).catch(err=>{ console.warn(err); bad('Could not open that model: '+(err.message||err)); }); e.target.value=''; });
-async function importGltf(files){ files=[...files]; const main=files.find(f=>/\.glb$/i.test(f.name))||files.find(f=>/\.gltf$/i.test(f.name));
+async function importGltf(files){ files=[...files]; if(files.some(f=>/\.(dae|skp)$/i.test(f.name))){ closeSheets(); return importSketchUp(files); } const main=files.find(f=>/\.glb$/i.test(f.name))||files.find(f=>/\.gltf$/i.test(f.name));
   if(!main){ if(files.some(f=>/\.(fbx|obj|blend|max|3ds|usdz|stl)$/i.test(f.name))) return bad('Please download the model as .glb (glTF Binary). Most free model sites offer it.'); return bad('Choose a .glb or .gltf 3D model file.'); }
   if(main.size>30*1048576) return bad('That model is over 30 MB. Pick a smaller or "low poly" version.');
   closeSheets(); toast('Opening '+main.name+'…'); let src;
